@@ -35,4 +35,4 @@ run_config:
   keep_checkpoint_max: 5
   log_level: INFO
   log_every_n_iter: 10
-  num_gpu: 2
+  num_gpu: 4

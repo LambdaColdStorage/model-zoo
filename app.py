@@ -36,7 +36,7 @@ class App(object):
 
   @abc.abstractmethod
   def train_and_eval(self):
-    """Evaluation interface
+    """Training and Evaluation interface
     """
     raise NotImplementedError()
 
@@ -54,6 +54,6 @@ class App(object):
 
   @abc.abstractmethod
   def tune(self):
-    """Inspect interface
+    """Hyper-parameter tuning interface
     """
     raise NotImplementedError()

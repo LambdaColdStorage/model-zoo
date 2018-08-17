@@ -8,7 +8,6 @@ Main python API for running machine learning jobs
 
 import argparse
 import importlib
-import glob
 import os
 import yaml
 import fileinput
@@ -19,6 +18,8 @@ def parse_config(config_path):
   """
   with open(config_path) as file:
     config = yaml.load(file.read())
+  config['train']['batch_size'] = config['train']['batch_size_per_gpu'] * \
+      config['run_config']['num_gpu']
 
   return config
 

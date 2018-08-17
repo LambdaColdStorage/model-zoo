@@ -19,18 +19,14 @@ class Inputter(inputter.Inputter):
 
   def input_fn(self, mode):
     if mode == tf.estimator.ModeKeys.TRAIN:
-      batch_size = self.config["train"]["batch_size_per_gpu"] * \
-          self.config["run_config"]["num_gpu"]
+      batch_size = self.config["train"]["batch_size"]
     else:
       assert False, \
         "Unknown mode for image_classifcation_inputter_syn: '{}'".format(mode)
 
-    bs_per_gpu = self.config["train"]["batch_size_per_gpu"]
-    num_gpu = self.config['run_config']['num_gpu']
-
     max_steps = (self.config["data"]["train_num_samples"] *
                  self.config["train"]["epochs"] //
-                 (bs_per_gpu * num_gpu))
+                 batch_size)
 
     input_dtype = tf.float32
     label_dtype = tf.int32

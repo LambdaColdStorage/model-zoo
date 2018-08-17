@@ -16,13 +16,6 @@ class Modeler(modeler.Modeler):
   def __init__(self, config):
     super(Modeler, self).__init__(config)
 
-  def create_graph_fn(self, mode, inputs):
-    """Create forward graph
-    Returns:
-      logits, predictions
-    """
-    pass
-
   def create_loss_fn(self, logits, labels):
     """Create loss operator
     Returns:
@@ -38,34 +31,6 @@ class Modeler(modeler.Modeler):
 
     return loss
 
-  def create_learning_rate_fn(self, global_step):
-    """Create learning rate
-    Returns:
-      A learning rate calcualtor used by TF's optimizer.
-    """
-    if "piecewise_learning_rate_decay" in self.config["train"]:
-      initial_learning_rate = self.config["train"]["learning_rate"]
-      batches_per_epoch = (self.config["data"]["train_num_samples"] /
-                           (self.config["train"]["batch_size_per_gpu"] *
-                            self.config['run_config']['num_gpu']))
-      boundaries = list(map(float,
-                            self.config["train"]["piecewise_boundaries"].split(",")))
-      boundaries = [int(batches_per_epoch * boundary) for boundary in boundaries]
-
-      decays = list(map(float,
-                        self.config["train"]["piecewise_learning_rate_decay"].split(",")))
-      values = [initial_learning_rate * decay for decay in decays]
-
-      learning_rate = tf.train.piecewise_constant(
-        tf.cast(global_step, tf.int32), boundaries, values)
-    else:
-      learning_rate = self.config["train"]["learning_rate"]
-
-    tf.identity(learning_rate, name="learning_rate")
-    tf.summary.scalar("learning_rate", learning_rate)
-
-    return learning_rate
-
   def create_eval_metrics_fn(self, predictions, labels):
     """ Create the evaluation metric
     Returns:
@@ -77,8 +42,35 @@ class Modeler(modeler.Modeler):
 
     return accuracy
 
-  def create_train_op_fn(self, *argv):
-    pass
+  def create_eval_metrics_fn_estimator(self, predictions, labels):
+    """ Create the evaluation metric
+    Returns:
+      A dictionary of metrics used by estimator.
+    """
+    accuracy = tf.metrics.accuracy(
+      tf.argmax(labels, axis=1),
+      predictions['classes'])
 
-  def create_graph_fn(self, *argv):
-    pass
+    # for logging in the console during training
+    tf.identity(accuracy[1], name='running_accuracy')
+
+    # for tensorboard train_accuracy
+    tf.summary.scalar('train_accuracy', accuracy[1])
+
+    # for tensorboard eval_accuracy (only run by estimator.eval)
+    metrics = {'eval_accuracy': accuracy}
+
+    return metrics
+
+  def create_hooks_fn_estimator(self):
+    """Returns a list of training hooks
+    """
+    tensors_to_log = {
+      'running_accuracy': 'running_accuracy',
+      'total_loss': 'total_loss',
+      'step': 'step'}
+
+    logging_hook = tf.train.LoggingTensorHook(
+      tensors=tensors_to_log,
+      every_n_iter=self.config['run_config']['log_every_n_iter'])
+    return [logging_hook]
