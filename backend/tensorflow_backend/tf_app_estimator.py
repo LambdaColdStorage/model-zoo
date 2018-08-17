@@ -125,8 +125,6 @@ class TF_App_Estimator(tf_app.TF_App):
                  self.config["train"]["epochs"] //
                  self.config["train"]["batch_size"])
 
-    
-
     (estimator.train(
      input_fn=lambda: self.inputter.input_fn(tf.estimator.ModeKeys.TRAIN),
      max_steps=max_steps,

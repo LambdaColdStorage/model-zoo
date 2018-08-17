@@ -8,44 +8,8 @@ Main python API for running machine learning jobs
 
 import argparse
 import importlib
-import os
-import yaml
-import fileinput
 
-
-def parse_config(config_path):
-  """Parse a config file into a config object.
-  """
-  with open(config_path) as file:
-    config = yaml.load(file.read())
-  config['train']['batch_size'] = config['train']['batch_size_per_gpu'] * \
-      config['run_config']['num_gpu']
-
-  return config
-
-
-def parse_test(args):
-  """Parse arguments into a list of samples.
-  """
-  # TODO:
-  # Add support for bash redirection
-  samples = []
-  if args.mode == 'infer':
-    if not args.test_path and not args.test_samples:
-      assert False, "Please provide test_path or test_samples."
-
-    if args.test_path:
-      # A single file where each line is a path to a test input
-      # TODO:
-      # Make this more general so each line can be a sample (for nmt etc.)
-      for line in fileinput.input(os.path.expanduser(args.test_path)):
-        clean = line.strip()
-        if clean:
-          samples.append(clean)
-    else:
-      # Strip the white space from the samples
-      samples = [x for x in args.test_samples.split(',')]
-  return samples
+import app_parser
 
 
 def main():
@@ -74,24 +38,12 @@ def main():
   args = parser.parse_args()
 
   # Load config
-  config = parse_config(args.config_path)
+  config = app_parser.parse_config(args.config_path)
 
   # Build an application
   app = importlib.import_module(config['app']).build(config)
 
-  if args.mode == 'train':
-    app.train()
-  elif args.mode == 'eval':
-    app.eval()
-  elif args.mode == 'train_and_eval':
-    app.train_and_eval()
-  elif args.mode == 'infer':
-    test_samples = parse_test(args)
-    app.infer(test_samples)
-  elif args.mode == 'tune':
-    app.tune()
-  elif args.mode == 'inspect':
-    app.inspect()
+  app.run(args)
 
 
 if __name__ == '__main__':

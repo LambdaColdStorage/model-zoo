@@ -25,14 +25,6 @@ class Modeler(object):
   def create_loss_fn(self, *argv):
     raise NotImplementedError()
 
-  # @abc.abstractmethod
-  # def create_learning_rate_fn(self, *argv):
-  #   raise NotImplementedError()
-
   @abc.abstractmethod
   def create_eval_metrics_fn(self, *argv):
     raise NotImplementedError()
-
-  # @abc.abstractmethod
-  # def create_train_op_fn(self, *argv):
-  #   raise NotImplementedError()
