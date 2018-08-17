@@ -1,0 +1,38 @@
+app: backend.tensorflow_backend.tf_app_simple
+inputter: backend.tensorflow_backend.inputters.image_classification_inputter_syn
+modeler: backend.tensorflow_backend.modelers.resnet32slim_modeler
+
+model:
+  dir: output/resnet32slim
+
+data:
+  height: 32
+  width: 32
+  depth: 3
+  num_classes: 10
+  train_num_samples: 50000
+  prefetch: 2
+
+train:
+  epochs: 10
+  batch_size_per_gpu: 128
+  learning_rate: 0.25
+  optimizer: momentum
+  optimizer_momentum: 0.9
+  l2_weight_decay: 0.0002
+  piecewise_learning_rate_decay: '1.0,0.1'
+  piecewise_boundaries: '1'
+
+eval:
+  epochs: 1
+  batch_size_per_gpu: 128
+
+run_config:  
+  winograd_nonfused: True
+  log_device_placement: False
+  save_summary_steps: 100
+  save_checkpoints_steps: 200
+  keep_checkpoint_max: 5
+  log_level: INFO
+  log_every_n_iter: 10
+  num_gpu: 2
