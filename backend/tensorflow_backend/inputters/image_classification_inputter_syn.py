@@ -53,7 +53,7 @@ class Inputter(inputter.Inputter):
     dataset = tf.data.Dataset.from_tensors(element).repeat(max_steps)
 
     # Add prefetch
-    dataset = dataset.prefetch(self.config["data"]["prefetch"])
+    dataset = dataset.prefetch(self.config["run_config"]["prefetch"])
 
     # Create iterator
     iterator = dataset.make_one_shot_iterator()
