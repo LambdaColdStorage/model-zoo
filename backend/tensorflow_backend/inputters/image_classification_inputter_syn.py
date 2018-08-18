@@ -18,8 +18,10 @@ class Inputter(inputter.Inputter):
     super(Inputter, self).__init__(config)
 
   def input_fn(self, mode):
-    if mode == tf.estimator.ModeKeys.TRAIN:
+    if mode == "train":
       batch_size = self.config["train"]["batch_size"]
+    elif mode == "eval":
+      batch_size = self.config["eval"]["batch_size"]
     else:
       assert False, \
         "Unknown mode for image_classifcation_inputter_syn: '{}'".format(mode)

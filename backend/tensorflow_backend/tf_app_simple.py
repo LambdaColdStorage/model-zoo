@@ -242,7 +242,80 @@ class TF_App_Simple(tf_app.TF_App):
   def eval(self):
     """Evaluation interface
     """
-    pass
+    tf.reset_default_graph()
+    eval_dir = self.config["model"]["dir"] + "/eval"
+    if not os.path.isdir(eval_dir):
+      tf.logging.info("Creating model directory %s",
+                      eval_dir)
+      os.makedirs(eval_dir)
+
+    # Comput miscellaneous
+    bs_per_gpu = self.config['eval']['batch_size_per_gpu']
+    num_gpu = self.config['run_config']['num_gpu']
+    max_steps = (self.config["data"]["eval_num_samples"] *
+                 self.config["eval"]["epochs"] //
+                 self.config["eval"]["batch_size"])
+
+    num_log = 10
+    steps_per_log = max_steps // num_log
+
+    # Build evaluation graph
+    with tf.device('/cpu:0'):
+      global_step = tf.train.get_or_create_global_step()
+
+      batch = self.inputter.input_fn('eval')
+      tower_accuracies = []
+
+      for i in range(num_gpu):
+        with tf.device(assign_to_device('/gpu:{}'.format(i),
+                       ps_device='/cpu:0')):
+          _x = batch[0][i * bs_per_gpu:(i + 1) * bs_per_gpu]
+          _y = batch[1][i * bs_per_gpu:(i + 1) * bs_per_gpu]
+
+          logits, predictions = self.modeler.create_graph_fn('eval', _x)
+
+          eval_accuracy = self.modeler.create_eval_metrics_fn(predictions, _y)
+          tower_accuracies.append(eval_accuracy)
+
+      accuracy = average_accuracies(tower_accuracies)
+
+    saver = tf.train.Saver(
+      max_to_keep=self.config['run_config']['keep_checkpoint_max'])
+
+    # Run evaluation
+    with tf.Session(config=self.session_config) as sess:
+      sess.run(tf.global_variables_initializer())
+
+      if tf.train.checkpoint_exists(
+        self.config['model']['dir'] + "/model.*"):
+        saver.restore(sess,
+                      tf.train.latest_checkpoint(
+                        self.config['model']['dir']))
+      else:
+        raise ValueError('Can not find any checkpoint.')
+
+      trained_step = sess.run(global_step)
+
+      accumulated_acc = 0.0
+      for step in range(max_steps):
+        _accuracy = \
+         sess.run(accuracy)
+        accumulated_acc = accumulated_acc + _accuracy
+        if step % steps_per_log == 0:
+          print("Evaluated " + str(step) + " of " + str(max_steps) +
+                " steps, running accuracy: " + str(accumulated_acc /
+                                                   (step + 1.0)))
+
+      mean_accuracy = accumulated_acc / max_steps
+      summary_writer = tf.summary.FileWriter(eval_dir,
+                                             graph=tf.get_default_graph())
+      summary = tf.Summary()
+      summary.value.add(tag="Eval accuracy", simple_value=mean_accuracy)
+      summary_writer.add_summary(summary, trained_step)
+      summary_writer.flush()
+      summary_writer.close()
+
+      print("Evaluation accuracy: " + str(mean_accuracy))
 
   def train_and_eval(self):
     """Training and Evaluation interface

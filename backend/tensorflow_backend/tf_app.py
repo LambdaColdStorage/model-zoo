@@ -100,9 +100,3 @@ class TF_App(app.App):
 
     return learning_rate
 
-  def create_train_op_fn(self, mode, loss):
-    """Create training operator
-    Returns:
-      train_op
-    """
-    pass

@@ -11,6 +11,7 @@ data:
   depth: 3
   num_classes: 10
   train_num_samples: 50000
+  eval_num_samples: 10000
   prefetch: 2
 
 train:
@@ -35,4 +36,4 @@ run_config:
   keep_checkpoint_max: 5
   log_level: INFO
   log_every_n_iter: 10
-  num_gpu: 4
+  num_gpu: 1

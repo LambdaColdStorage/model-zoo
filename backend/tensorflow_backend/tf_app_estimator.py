@@ -16,6 +16,27 @@ class TF_App_Estimator(tf_app.TF_App):
   def __init__(self, config):
     super(TF_App_Estimator, self).__init__(config)
 
+    self.run_config = tf.estimator.RunConfig(
+      session_config=self.session_config,
+      model_dir=self.config['model']['dir'],
+      save_summary_steps=self.config["run_config"]['save_summary_steps'],
+      save_checkpoints_steps=self.config["run_config"]['save_checkpoints_steps'],
+      keep_checkpoint_max=self.config["run_config"]['keep_checkpoint_max'],
+      log_step_count_steps=self.config["run_config"]['log_every_n_iter'],
+      train_distribute=None)
+
+    devices = []
+    for i in range(self.config['run_config']['num_gpu']):
+      devices.append(u'/device:GPU:' + str(i))
+
+    model_fn = (tf.contrib.estimator.replicate_model_fn(
+                self.model_fn,
+                loss_reduction=tf.losses.Reduction.MEAN,
+                devices=devices))
+
+    self.estimator = (tf.estimator.Estimator(model_fn=model_fn,
+                                          config=self.run_config))
+
   def create_train_op_fn(self, mode, loss):
     """Create training operator
     Returns:
@@ -100,32 +121,11 @@ class TF_App_Estimator(tf_app.TF_App):
   def train(self):
     """Training interface
     """
-    devices = []
-    for i in range(self.config['run_config']['num_gpu']):
-      devices.append(u'/device:GPU:' + str(i))
-
-    model_fn = (tf.contrib.estimator.replicate_model_fn(
-                self.model_fn,
-                loss_reduction=tf.losses.Reduction.MEAN,
-                devices=devices))
-
-    run_config = tf.estimator.RunConfig(
-      session_config=self.session_config,
-      model_dir=self.config['model']['dir'],
-      save_summary_steps=self.config["run_config"]['save_summary_steps'],
-      save_checkpoints_steps=self.config["run_config"]['save_checkpoints_steps'],
-      keep_checkpoint_max=self.config["run_config"]['keep_checkpoint_max'],
-      log_step_count_steps=self.config["run_config"]['log_every_n_iter'],
-      train_distribute=None)
-
-    estimator = (tf.estimator.Estimator(model_fn=model_fn,
-                                        config=run_config))
-
     max_steps = (self.config["data"]["train_num_samples"] *
                  self.config["train"]["epochs"] //
                  self.config["train"]["batch_size"])
 
-    (estimator.train(
+    (self.estimator.train(
      input_fn=lambda: self.inputter.input_fn(tf.estimator.ModeKeys.TRAIN),
      max_steps=max_steps,
      hooks=self.modeler.create_hooks_fn_estimator()))
@@ -133,7 +133,9 @@ class TF_App_Estimator(tf_app.TF_App):
   def eval(self):
     """Evaluation interface
     """
-    pass
+    eval_results = (self.estimator.evaluate(
+      input_fn=lambda: self.inputter.input_fn(tf.estimator.ModeKeys.EVAL)))
+
 
   def train_and_eval(self):
     """Training and Evaluation interface
