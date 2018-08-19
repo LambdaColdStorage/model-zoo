@@ -116,9 +116,6 @@ class Modeler(modeler.Modeler):
     prediction: a dictinary that has a probabilities field and a classes field.
     Each of these fields represent a single result.
     """
-    print(prediction)
-    print(prediction['probabilities'])
-    print(prediction['classes'])
     print('class: ' +
           str(prediction['classes']) +
           ', probability: ' +
