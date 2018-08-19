@@ -12,7 +12,8 @@ def parse_config(config_path):
       config['run_config']['num_gpu']
   config['eval']['batch_size'] = config['eval']['batch_size_per_gpu'] * \
       config['run_config']['num_gpu']
-
+  config['infer']['batch_size'] = config['infer']['batch_size_per_gpu'] * \
+      config['run_config']['num_gpu']
   return config
 
 

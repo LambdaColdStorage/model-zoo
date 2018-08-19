@@ -137,10 +137,16 @@ class TF_App_Estimator(tf_app.TF_App):
       input_fn=lambda: self.inputter.input_fn(tf.estimator.ModeKeys.EVAL)))
 
 
-  def infer(self):
+  def infer(self, test_samples):
     """Inference interface
     """
-    pass
+    predictions = self.estimator.predict(
+      input_fn=lambda: self.inputter.input_fn(tf.estimator.ModeKeys.PREDICT,
+                                              test_samples=test_samples))
+
+    for prediction, sample in zip(predictions, test_samples):
+      self.modeler.display_prediction_estimator(prediction, sample)
+
 
   def inspect(self):
     """Inspect interface

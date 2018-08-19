@@ -6,6 +6,7 @@ Licensed under
 Implement TF modeler interfaces for image classification.
 """
 from __future__ import print_function
+import numpy as np
 
 import tensorflow as tf
 
@@ -97,6 +98,27 @@ class Modeler(modeler.Modeler):
     }
 
     return logits, predictions
+
+  def display_prediction_simple(self, predictions, sample=None):
+    print(predictions)
+    print(sample)
+    # classes = np.squeeze(np.asarray(_tower_classes), axis=0)
+    # probabilities = np.squeeze(np.asarray(_tower_probabilities), axis=0)
+
+    # for c, p in zip(classes, probabilities):
+    #   print("class: " + str(c) + ", probability: " + str(p[c]))
+
+
+  def display_prediction_estimator(self, prediction, sample=None):
+    """Displays predcition result
+    """
+    print(prediction)
+    print(prediction['probabilities'])
+    print(prediction['classes'])
+    print('class: ' +
+          str(prediction['classes']) +
+          ', probability: ' +
+          str(prediction['probabilities'][prediction['classes']]))
 
 
 def build(config):

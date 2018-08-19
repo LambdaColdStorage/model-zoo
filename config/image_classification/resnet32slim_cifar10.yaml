@@ -1,4 +1,4 @@
-app: backend.tensorflow_backend.tf_app_simple
+app: backend.tensorflow_backend.tf_app_estimator
 modeler: backend.tensorflow_backend.modelers.image_classification_modeler
 network: resnet32slim
 inputter: backend.tensorflow_backend.inputters.image_classification_inputter_csv
@@ -30,18 +30,22 @@ run_config:
   prefetch: 2
 
 train:
-  epochs: 1
+  epochs: 10
   batch_size_per_gpu: 256
-  learning_rate: 0.25
+  learning_rate: 0.01
   optimizer: momentum
   optimizer_momentum: 0.9
   l2_weight_decay: 0.0002
-  piecewise_learning_rate_decay: '1.0,0.1,0.01,0.001'
-  piecewise_boundaries: '30,60,90'
+  piecewise_learning_rate_decay: '1.0,0.1'
+  piecewise_boundaries: '5'
 
 eval:
   epochs: 1
   batch_size_per_gpu: 128
+
+infer:
+  epochs: 1
+  batch_size_per_gpu: 1
 
 tune:
   num_trials: 20

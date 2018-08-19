@@ -25,12 +25,17 @@ class Inputter(inputter.Inputter):
     Returns:
       A data generator used by estimator.
     """    
+    if mode is "infer":
+      num_samples = len(test_samples)
+      meta_filename = None
+    else:
+      num_samples = self.config['data'][mode + "_num_samples"]
+      meta_filename = (self.config["data"]["dir"] + '/' +
+                 self.config["data"][mode + "_meta"])
+
     batch_size = self.config[mode]["batch_size"]
     epochs = self.config[mode]["epochs"]
-    num_samples = self.config['data'][mode + "_num_samples"]
     max_steps = (num_samples * epochs // batch_size)
-    meta_filename = (self.config["data"]["dir"] + '/' +
-                     self.config["data"][mode + "_meta"])
 
     samples = self.get_samples_fn(mode, meta_filename, test_samples)
 

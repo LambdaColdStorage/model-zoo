@@ -8,6 +8,7 @@ Implement TF application use low level API (tf.train)
 from __future__ import print_function
 import time
 import os
+import numpy as np
 
 import tensorflow as tf
 
@@ -316,10 +317,54 @@ class TF_App_Simple(tf_app.TF_App):
 
       print("Evaluation accuracy: " + str(mean_accuracy))
 
-  def infer(self):
+  def infer(self, test_samples):
     """Inference interface
     """
-    pass
+    tf.reset_default_graph()
+
+    # Comput miscellaneous
+    bs_per_gpu = self.config['infer']['batch_size_per_gpu']
+    num_gpu = self.config['run_config']['num_gpu']
+    max_steps = (len(test_samples) //
+                 self.config["infer"]["batch_size"])
+
+    # Build evaluation graph
+    with tf.device('/cpu:0'):
+      global_step = tf.train.get_or_create_global_step()
+
+      batch = self.inputter.input_fn('infer', test_samples)
+
+      tower_predictions = []
+
+      for i in range(num_gpu):
+        with tf.device(assign_to_device('/gpu:{}'.format(i),
+                       ps_device='/cpu:0')):
+          _x = batch[0][i * bs_per_gpu:(i + 1) * bs_per_gpu]
+          _y = batch[1][i * bs_per_gpu:(i + 1) * bs_per_gpu]
+
+          logits, predictions = self.modeler.create_graph_fn('infer', _x)
+
+          tower_predictions.append(predictions)
+
+    saver = tf.train.Saver(
+      max_to_keep=self.config['run_config']['keep_checkpoint_max'])
+
+    # Run evaluation
+    with tf.Session(config=self.session_config) as sess:
+      sess.run(tf.global_variables_initializer())
+
+      if tf.train.checkpoint_exists(
+        self.config['model']['dir'] + "/model.*"):
+        saver.restore(sess,
+                      tf.train.latest_checkpoint(
+                        self.config['model']['dir']))
+      else:
+        raise ValueError('Can not find any checkpoint.')
+
+      for step in range(max_steps):
+        _tower_predictions = sess.run(tower_predictions)
+        self.modeler.display_prediction_simple(predictions, test_samples)
+
 
   def inspect(self):
     """Inspect interface

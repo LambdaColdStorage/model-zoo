@@ -46,6 +46,10 @@ eval:
   epochs: 1
   batch_size_per_gpu: 64
 
+infer:
+  epochs: 1
+  batch_size_per_gpu: 1
+
 tune:
   num_trials: 20
   fixedparams:
