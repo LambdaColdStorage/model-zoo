@@ -7,6 +7,8 @@ Class for TF application.
 """
 from __future__ import print_function
 import importlib
+import random
+import os
 
 import tensorflow as tf
 
@@ -100,3 +102,60 @@ class TF_App(app.App):
 
     return learning_rate
 
+  def train_and_eval(self):
+    """Training and Evaluation interface
+    """
+    self.train()
+    self.eval()
+
+  def tune(self):
+    """Hyper-parameter Tuning interface
+    """
+    def type_convert(s):
+        ''' convert value to int, float or str'''
+        try:
+            float(s)
+
+            tp = 1 if s.count('.') == 0 else 2
+        except ValueError:
+            tp = -1
+
+        if tp == 1:
+          return int(v)
+        elif tp == 2:
+          return float(v)
+        elif tp == -1:
+          return v
+        else:
+          assert False, "Unknown type for hyper parameter: '{}'".format(tp)
+
+    # setup the tunning jobs
+    num_trials = self.config['tune']['num_trials']
+
+    # update the fixed parameters in self.config['train']
+    for field in list(self.config['tune']['fixedparams'].keys()):
+      for param in list(self.config['tune']['fixedparams'][field].keys()):
+        self.config[field][param] = \
+          self.config['tune']['fixedparams'][field][param]
+
+    # randomly generate hyper parameters for each trail
+    dir_ori = self.config['model']['dir'] + '/tune/tune'
+    t = 0
+    while t < num_trials:
+      dir_update = dir_ori
+      for field in list(self.config['tune']['hyperparams'].keys()):
+        if field in self.config:
+          for param in list(self.config['tune']['hyperparams'][field].keys()):
+            if param in self.config[field]:
+              values = \
+                self.config['tune']['hyperparams'][field][param].split(',')
+              v = random.choice(values)
+              self.config[field][param] = type_convert(v)
+              dir_update = dir_update + '_' + param + '_' + str(v)
+
+      # run experiment the same hyper parameters haven't been used before
+      if not os.path.isdir(dir_update):
+        self.config['model']['dir'] = dir_update
+        self.train_and_eval()
+        # print(dir_update)
+        t = t + 1

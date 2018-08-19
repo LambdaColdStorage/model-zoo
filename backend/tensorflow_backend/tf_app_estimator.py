@@ -137,11 +137,6 @@ class TF_App_Estimator(tf_app.TF_App):
       input_fn=lambda: self.inputter.input_fn(tf.estimator.ModeKeys.EVAL)))
 
 
-  def train_and_eval(self):
-    """Training and Evaluation interface
-    """
-    pass
-
   def infer(self):
     """Inference interface
     """
@@ -149,11 +144,6 @@ class TF_App_Estimator(tf_app.TF_App):
 
   def inspect(self):
     """Inspect interface
-    """
-    pass
-
-  def tune(self):
-    """Hyper-parameter Tuning interface
     """
     pass
 

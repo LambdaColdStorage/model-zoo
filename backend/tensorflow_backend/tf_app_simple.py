@@ -317,11 +317,6 @@ class TF_App_Simple(tf_app.TF_App):
 
       print("Evaluation accuracy: " + str(mean_accuracy))
 
-  def train_and_eval(self):
-    """Training and Evaluation interface
-    """
-    pass
-
   def infer(self):
     """Inference interface
     """
@@ -331,12 +326,6 @@ class TF_App_Simple(tf_app.TF_App):
     """Inspect interface
     """
     pass
-
-  def tune(self):
-    """Hyper-parameter Tuning interface
-    """
-    pass
-
 
 def build(config):
   """Returns the constructor of the application

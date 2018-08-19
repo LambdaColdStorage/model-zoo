@@ -1,4 +1,4 @@
-app: backend.tensorflow_backend.tf_app_simple
+app: backend.tensorflow_backend.tf_app_estimator
 inputter: backend.tensorflow_backend.inputters.image_classification_inputter_csv
 modeler: backend.tensorflow_backend.modelers.resnet32slim_modeler
 augmenter: external.tf_slim.preprocessing.cifarnet_preprocessing
@@ -17,8 +17,19 @@ data:
   train_meta: train.csv
   eval_meta: eval.csv  
 
+run_config:  
+  winograd_nonfused: True
+  log_device_placement: False
+  save_summary_steps: 100
+  save_checkpoints_steps: 200
+  keep_checkpoint_max: 5
+  log_level: INFO
+  log_every_n_iter: 10
+  num_gpu: 1
+  prefetch: 2
+
 train:
-  epochs: 100
+  epochs: 1
   batch_size_per_gpu: 256
   learning_rate: 0.25
   optimizer: momentum
@@ -31,13 +42,14 @@ eval:
   epochs: 1
   batch_size_per_gpu: 128
 
-run_config:  
-  winograd_nonfused: True
-  log_device_placement: False
-  save_summary_steps: 100
-  save_checkpoints_steps: 200
-  keep_checkpoint_max: 5
-  log_level: INFO
-  log_every_n_iter: 10
-  num_gpu: 1
-  prefetch: 2
+tune:
+  num_trials: 20
+  fixedparams:
+    train:
+      epochs: 2
+      piecewise_learning_rate_decay: '1.0,0.1'
+      piecewise_boundaries: '1'
+  hyperparams:
+    train:
+      learning_rate: '0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025'
+      optimizer: 'momentum,adam,rmsprop'
