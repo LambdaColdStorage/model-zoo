@@ -1,0 +1,56 @@
+app: backend.tensorflow_backend.tf_app_simple
+inputter: backend.tensorflow_backend.inputters.image_classification_inputter_csv
+modeler: backend.tensorflow_backend.modelers.resnetslim_modeler
+augmenter: external.tf_slim.preprocessing.vgg_preprocessing
+
+model:
+  name: resnet50
+  dir: output/resnet50slim
+
+data:
+  height: 224
+  width: 224
+  depth: 3
+  num_classes: 120
+  train_num_samples: 12000
+  eval_num_samples: 8580
+  dir: data/StanfordDogs120
+  train_meta: train.csv
+  eval_meta: eval.csv  
+
+run_config:  
+  winograd_nonfused: True
+  log_device_placement: False
+  save_summary_steps: 100
+  save_checkpoints_steps: 200
+  keep_checkpoint_max: 5
+  log_level: INFO
+  log_every_n_iter: 10
+  num_gpu: 1
+  prefetch: 2
+
+train:
+  epochs: 20
+  batch_size_per_gpu: 64
+  learning_rate: 0.01
+  optimizer: momentum
+  optimizer_momentum: 0.9
+  l2_weight_decay: 0.0002
+  piecewise_learning_rate_decay: '1.0,0.1'
+  piecewise_boundaries: '10'
+
+eval:
+  epochs: 1
+  batch_size_per_gpu: 64
+
+tune:
+  num_trials: 20
+  fixedparams:
+    train:
+      epochs: 4
+      piecewise_learning_rate_decay: '1.0,0.1'
+      piecewise_boundaries: '2'
+  hyperparams:
+    train:
+      learning_rate: '0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025'
+      optimizer: 'momentum,adam,rmsprop'

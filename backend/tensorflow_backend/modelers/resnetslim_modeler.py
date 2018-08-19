@@ -6,6 +6,7 @@ Licensed under
 Implement resnet32 interfaces based on TF-slim
 """
 from __future__ import print_function
+import importlib
 
 import tensorflow as tf
 
@@ -14,6 +15,10 @@ from external.tf_slim import resnet_v2
 
 slim = tf.contrib.slim
 
+net_factory = {
+  "resnet32": "resnet_v2_32",
+  "resnet50": "resnet_v2_50"
+}
 
 class Modeler(image_classification_modeler.Modeler):
   def __init__(self, config):
@@ -27,9 +32,12 @@ class Modeler(image_classification_modeler.Modeler):
     is_training = (mode == "train")
     num_classes = self.config["data"]["num_classes"]
     with slim.arg_scope(resnet_v2.resnet_arg_scope()):
-      logits, end_points = resnet_v2.resnet_v2_32(inputs,
-                                                  num_classes,
-                                                  is_training=is_training)
+
+      net_creator = getattr(resnet_v2, net_factory[self.config["model"]["name"]])
+
+      logits, end_points = net_creator(inputs,
+                                       num_classes,
+                                       is_training=is_training)
 
     predictions = {
       "classes": tf.argmax(logits, axis=1),
