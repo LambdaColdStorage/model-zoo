@@ -363,7 +363,7 @@ class TF_App_Simple(tf_app.TF_App):
 
       for step in range(max_steps):
         _tower_predictions = sess.run(tower_predictions)
-        self.modeler.display_prediction_simple(predictions, test_samples)
+        self.modeler.display_prediction_simple(_tower_predictions, test_samples)
 
 
   def inspect(self):

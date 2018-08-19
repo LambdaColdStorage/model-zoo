@@ -13,8 +13,6 @@ import tensorflow as tf
 from backend.tensorflow_backend import modeler
 from backend.tensorflow_backend.networks import network_factory
 
-# from external.tf_slim import resnet_v2
-
 
 class Modeler(modeler.Modeler):
   def __init__(self, config):
@@ -83,7 +81,8 @@ class Modeler(modeler.Modeler):
   def create_graph_fn(self, mode, inputs):
     """Create forward graph
     Returns:
-      logits, predictions
+      logits: A tensorf holds the raw outputs of the network.
+      predictions: A dictionary hold post-processed results.
     """
     is_training = (mode == "train")
     num_classes = self.config["data"]["num_classes"]
@@ -100,17 +99,22 @@ class Modeler(modeler.Modeler):
     return logits, predictions
 
   def display_prediction_simple(self, predictions, sample=None):
-    print(predictions)
-    print(sample)
-    # classes = np.squeeze(np.asarray(_tower_classes), axis=0)
-    # probabilities = np.squeeze(np.asarray(_tower_probabilities), axis=0)
-
-    # for c, p in zip(classes, probabilities):
-    #   print("class: " + str(c) + ", probability: " + str(p[c]))
-
+    """Displays predcition result for simple API
+    Input:
+    prediction: a list of dictionary. Each dictionary has a probabilities field and a classes field.
+    Each of these fields is also a list of results.
+    """
+    for prediction in predictions:
+      probabilities = prediction["probabilities"]
+      classes = prediction["classes"]
+      for p, c in zip(probabilities, classes):
+        print("class: " + str(c) + ", probability: " + str(p[c]))
 
   def display_prediction_estimator(self, prediction, sample=None):
-    """Displays predcition result
+    """Displays predcition result for estimator API
+    Input:
+    prediction: a dictinary that has a probabilities field and a classes field.
+    Each of these fields represent a single result.
     """
     print(prediction)
     print(prediction['probabilities'])

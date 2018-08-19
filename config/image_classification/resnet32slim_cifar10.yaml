@@ -1,4 +1,4 @@
-app: backend.tensorflow_backend.tf_app_estimator
+app: backend.tensorflow_backend.tf_app_simple
 modeler: backend.tensorflow_backend.modelers.image_classification_modeler
 network: resnet32slim
 inputter: backend.tensorflow_backend.inputters.image_classification_inputter_csv
