@@ -108,8 +108,7 @@ class TF_App_Simple(tf_app.TF_App):
                                     for v in tf.get_collection(
                                         tf.GraphKeys.GLOBAL_VARIABLES)}
 
-            if ("skip_restore_var_list" in
-                    self.config["train"]["skip_restore_var_list"]):
+            if ("skip_restore_var_list" in self.config["train"]):
               variables_to_restore = {
                 v: variables_to_restore[v] for
                 v in variables_to_restore if not

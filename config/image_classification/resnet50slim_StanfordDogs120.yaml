@@ -1,4 +1,4 @@
-app: backend.tensorflow_backend.tf_app_simple
+app: backend.tensorflow_backend.tf_app_estimator
 inputter: backend.tensorflow_backend.inputters.image_classification_inputter_csv
 modeler: backend.tensorflow_backend.modelers.resnetslim_modeler
 augmenter: external.tf_slim.preprocessing.vgg_preprocessing
@@ -38,6 +38,9 @@ train:
   l2_weight_decay: 0.0002
   piecewise_learning_rate_decay: '1.0,0.1'
   piecewise_boundaries: '10'
+  restore_ckpt: "/home/chuan/models/resnet_v2_50_2017_04_14"
+  skip_restore_var_list: ["resnet_v2_50/logits","step"]
+  trainable_var_list: ["resnet_v2_50/logits"]
 
 eval:
   epochs: 1

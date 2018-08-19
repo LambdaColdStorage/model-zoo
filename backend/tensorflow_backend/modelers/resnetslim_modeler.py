@@ -3,7 +3,7 @@ Copyright 2018 Lambda Labs. All Rights Reserved.
 Licensed under
 ==========================================================================
 
-Implement resnet32 interfaces based on TF-slim
+Implement resnet interfaces based on TF-slim
 """
 from __future__ import print_function
 import importlib
