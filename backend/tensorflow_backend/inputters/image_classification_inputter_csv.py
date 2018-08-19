@@ -90,14 +90,16 @@ class Inputter(inputter.Inputter):
   def preprocessing(self, image, mode):
     """Default preprocess for image classification
     """
-    is_training = (mode == 'train')
+    if 'augmenter' in self.config:
+      is_training = (mode == 'train')
+      augmenter = importlib.import_module(self.config['augmenter'])
 
-    augmenter = importlib.import_module(self.config['augmenter'])
-
-    return augmenter.preprocess_image(image,
-                                      self.config['data']['height'],
-                                      self.config['data']['width'],
-                                      is_training)
+      return augmenter.preprocess_image(image,
+                                        self.config['data']['height'],
+                                        self.config['data']['width'],
+                                        is_training)
+    else:
+      return tf.to_float(image)
 
   def parse_fn(self, mode, image_path, label):
     """Parse a single input sample
