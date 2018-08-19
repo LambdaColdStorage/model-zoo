@@ -10,11 +10,15 @@ from __future__ import print_function
 import tensorflow as tf
 
 from backend.tensorflow_backend import modeler
+from backend.tensorflow_backend.networks import network_factory
+
+# from external.tf_slim import resnet_v2
 
 
 class Modeler(modeler.Modeler):
   def __init__(self, config):
     super(Modeler, self).__init__(config)
+    self.net = network_factory.get_network(self.config["network"])
 
   def create_loss_fn(self, logits, labels):
     """Create loss operator
@@ -74,3 +78,28 @@ class Modeler(modeler.Modeler):
       tensors=tensors_to_log,
       every_n_iter=self.config['run_config']['log_every_n_iter'])
     return [logging_hook]
+
+  def create_graph_fn(self, mode, inputs):
+    """Create forward graph
+    Returns:
+      logits, predictions
+    """
+    is_training = (mode == "train")
+    num_classes = self.config["data"]["num_classes"]
+
+    logits, end_points = self.net(inputs,
+                                  num_classes,
+                                  is_training=is_training)
+
+    predictions = {
+      "classes": tf.argmax(logits, axis=1),
+      "probabilities": end_points["predictions"]
+    }
+
+    return logits, predictions
+
+
+def build(config):
+  """Returns the constructor of the modeler
+  """
+  return Modeler(config)

@@ -1,10 +1,10 @@
 app: backend.tensorflow_backend.tf_app_simple
+modeler: backend.tensorflow_backend.modelers.image_classification_modeler
+network: resnet32slim
 inputter: backend.tensorflow_backend.inputters.image_classification_inputter_csv
-modeler: backend.tensorflow_backend.modelers.resnetslim_modeler
-augmenter: external.tf_slim.preprocessing.cifarnet_preprocessing
+augmenter: backend.tensorflow_backend.networks.external.tf_slim.preprocessing.cifarnet_preprocessing
 
 model:
-  name: resnet32
   dir: output/resnet32slim
 
 data:
