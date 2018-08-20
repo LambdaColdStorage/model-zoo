@@ -6,6 +6,9 @@ Licensed under
 Implement TF modeler interfaces for image segmentation.
 """
 from __future__ import print_function
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
 
 import tensorflow as tf
 
@@ -15,6 +18,9 @@ from backend.tensorflow.modelers import modeler
 class Modeler(modeler.Modeler):
   def __init__(self, config):
     super(Modeler, self).__init__(config)
+    # create a color palette
+    self.colors = np.random.randint(255,
+                                    size=(config["data"]["num_classes"], 3))
 
   def create_loss_fn(self, logits, labels):
     """Create loss operator
@@ -57,35 +63,33 @@ class Modeler(modeler.Modeler):
     Returns:
       A dictionary of metrics used by estimator.
     """
-    pass
-    # accuracy = tf.metrics.accuracy(
-    #   tf.argmax(labels, axis=1),
-    #   predictions["classes"])
+    accuracy = tf.metrics.accuracy(
+      predictions["classes"],
+      labels)
 
-    # # for logging in the console during training
-    # tf.identity(accuracy[1], name="running_accuracy")
+    # for logging in the console during training
+    tf.identity(accuracy[1], name="running_accuracy")
 
-    # # for tensorboard train_accuracy
-    # tf.summary.scalar("train_accuracy", accuracy[1])
+    # for tensorboard train_accuracy
+    tf.summary.scalar("train_accuracy", accuracy[1])
 
-    # # for tensorboard eval_accuracy (only run by estimator.eval)
-    # metrics = {"eval_accuracy": accuracy}
+    # for tensorboard eval_accuracy (only run by estimator.eval)
+    metrics = {"eval_accuracy": accuracy}
 
-    # return metrics
+    return metrics
 
   def create_hooks_fn_estimator(self):
     """Returns a list of training hooks
     """
-    pass
-    # tensors_to_log = {
-    #   "running_accuracy": "running_accuracy",
-    #   "total_loss": "total_loss",
-    #   "step": "step"}
+    tensors_to_log = {
+      "running_accuracy": "running_accuracy",
+      "total_loss": "total_loss",
+      "step": "step"}
 
-    # logging_hook = tf.train.LoggingTensorHook(
-    #   tensors=tensors_to_log,
-    #   every_n_iter=self.config["run_config"]["log_every_n_iter"])
-    # return [logging_hook]
+    logging_hook = tf.train.LoggingTensorHook(
+      tensors=tensors_to_log,
+      every_n_iter=self.config["run_config"]["log_every_n_iter"])
+    return [logging_hook]
 
   def create_graph_fn(self, mode, inputs):
     """Create forward graph
@@ -98,18 +102,41 @@ class Modeler(modeler.Modeler):
 
     return self.net(inputs, num_classes, is_training=is_training)
 
+  def render_label(self, label, num_classes, label_colors):
+
+    label = label.astype(int)
+    r = np.zeros((label.shape[0], label.shape[1]), dtype=np.uint8)
+    g = np.zeros((label.shape[0], label.shape[1]), dtype=np.uint8)
+    b = np.zeros((label.shape[0], label.shape[1]), dtype=np.uint8)
+
+    for i_color in range(0, num_classes):
+      r[label == i_color] = label_colors[i_color, 0]
+      g[label == i_color] = label_colors[i_color, 1]
+      b[label == i_color] = label_colors[i_color, 2]
+
+    rgb = np.zeros((label.shape[0], label.shape[1], 3), dtype=np.uint8)
+    rgb[:, :, 0] = r
+    rgb[:, :, 1] = g
+    rgb[:, :, 2] = b
+
+    return rgb
+
   def display_prediction_simple(self, predictions, sample=None):
     """Displays predcition result for simple API
     Input:
-    prediction: a list of dictionary. Each dictionary has a probabilities field and a classes field.
+    prediction: a list of dictionary. Each dictionary has a probabilities field
+                and a classes field.
     Each of these fields is also a list of results.
     """
-    pass
-    # for prediction in predictions:
-    #   probabilities = prediction["probabilities"]
-    #   classes = prediction["classes"]
-    #   for p, c in zip(probabilities, classes):
-    #     print("class: " + str(c) + ", probability: " + str(p[c]))
+    for prediction in predictions:
+      classes = prediction["classes"]
+      for c in classes:
+        render_label = self.render_label(c,
+                                         self.config['data']['num_classes'],
+                                         self.colors)
+        image_out = Image.fromarray(render_label, 'RGB')
+        plt.imshow(image_out)
+        plt.show()
 
   def display_prediction_estimator(self, prediction, sample=None):
     """Displays predcition result for estimator API
@@ -117,7 +144,15 @@ class Modeler(modeler.Modeler):
     prediction: a dictinary that has a probabilities field and a classes field.
     Each of these fields represent a single result.
     """
-    pass
+    predicted_label = prediction['classes']
+    render_label = self.render_label(predicted_label,
+                                     self.config['data']['num_classes'],
+                                     self.colors)
+
+    image_out = Image.fromarray(render_label, 'RGB')
+
+    plt.imshow(image_out)
+    plt.show()
 
 
 def build(config):

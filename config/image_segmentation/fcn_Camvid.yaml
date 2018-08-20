@@ -1,5 +1,5 @@
 backend: tensorflow
-app: tf_app_simple
+app: tf_app_estimator
 modeler: image_segmentation_modeler
 network: fcn
 inputter: image_segmentation_inputter_csv

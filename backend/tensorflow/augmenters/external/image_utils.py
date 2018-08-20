@@ -1,6 +1,6 @@
 # Copyright 2018 Lambda Labs. All Rights Reserved.
 # Licensed under
-# =====================================================================fl=======
+# ============================================================================
 
 """A curate of image processing functions implemented in tensorflow
 """
