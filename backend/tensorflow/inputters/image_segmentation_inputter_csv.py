@@ -3,7 +3,7 @@ Copyright 2018 Lambda Labs. All Rights Reserved.
 Licensed under
 ==========================================================================
 
-Implement TF inputter interfaces for image classification (real data)
+Implement TF inputter interfaces for image segmentation (real data)
 """
 from __future__ import print_function
 import os
@@ -42,24 +42,24 @@ class Inputter(inputter.Inputter):
 
     dataset = tf.data.Dataset.from_tensor_slices(samples)
 
-    if mode == "train":
-     dataset = \
-       dataset.shuffle(buffer_size=self.config["data"]["train_num_samples"])
+    # if mode == "train":
+    #  dataset = \
+    #    dataset.shuffle(buffer_size=self.config["data"]["train_num_samples"])
 
-    # Call repeat after shuffling, rather than before, to prevent separate
-    # epochs blurred boundaries
-    dataset = dataset.repeat(epochs)
+    # # Call repeat after shuffling, rather than before, to prevent separate
+    # # epochs blurred boundaries
+    # dataset = dataset.repeat(epochs)
 
-    dataset = dataset.map(
-      lambda image, label: self.parse_fn(mode, image, label),
-      num_parallel_calls=6)
+    # dataset = dataset.map(
+    #   lambda image, label: self.parse_fn(mode, image, label),
+    #   num_parallel_calls=6)
 
-    dataset = dataset.apply(
-        tf.contrib.data.batch_and_drop_remainder(batch_size))
+    # dataset = dataset.apply(
+    #     tf.contrib.data.batch_and_drop_remainder(batch_size))
 
-    # Add this to control the length of experiment by total_examples
-    # Useful for hyper-parameter search with shorter experiments 
-    dataset = dataset.take(max_steps)
+    # # Add this to control the length of experiment by total_examples
+    # # Useful for hyper-parameter search with shorter experiments 
+    # dataset = dataset.take(max_steps)
 
     # Add prefetch
     dataset = dataset.prefetch(self.config["run_config"]["prefetch"])
@@ -74,21 +74,21 @@ class Inputter(inputter.Inputter):
     """
     if mode == "infer":
       images_path = test_samples
-      labels = [-1] * len(test_samples)
-      return (images_path, labels)
+      labels_path = test_samples
+      return (images_path, labels_path)
     elif mode == "train" or \
             mode == "eval":
       assert os.path.exists(meta_filename), (
         "Cannot find " + meta_filename)
 
       images_path = []
-      labels = []
+      labels_path = []
       with open(meta_filename) as f:
         parsed = csv.reader(f, delimiter=",", quotechar="'")
         for row in parsed:
           images_path.append(self.config["data"]["dir"] + "/" + row[0])
-          labels.append(int(row[1]))
-      return (images_path, labels)
+          labels_path.append(self.config['data']['dir'] + '/' + row[1])
+      return (images_path, images_path)
 
     else:
       unknow_mode(mode)

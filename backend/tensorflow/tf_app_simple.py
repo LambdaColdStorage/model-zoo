@@ -369,7 +369,15 @@ class TF_App_Simple(tf_app.TF_App):
   def inspect(self):
     """Inspect interface
     """
-    pass
+    if True:
+      item = self.inputter.input_fn("train")
+      with tf.Session() as sess:
+        sess.run(tf.initialize_all_tables())
+        sess.run(tf.global_variables_initializer())
+        for i_run in range(10):
+          _item = sess.run(item)
+          print(i_run)
+          print(_item)
 
 def build(config):
   """Returns the constructor of the application

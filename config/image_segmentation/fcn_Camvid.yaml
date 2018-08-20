@@ -1,0 +1,65 @@
+backend: tensorflow
+app: tf_app_simple
+modeler: image_segmentation_modeler
+network: fcn
+inputter: image_segmentation_inputter_csv
+augmenter: fcn
+
+model:
+  dir: output/fcn_Camvid
+
+data:
+  height: 360
+  width: 480
+  depth: 3
+  num_classes: 12
+  train_num_samples: 367
+  eval_num_samples: 233
+  dir: data/Camvid
+  train_meta: train.csv
+  eval_meta: eval.csv  
+  output_height: 368
+  output_width: 480
+  resize_side_min: 400
+  resize_side_max: 600
+
+run_config:  
+  winograd_nonfused: True
+  log_device_placement: False
+  save_summary_steps: 100
+  save_checkpoints_steps: 200
+  keep_checkpoint_max: 5
+  log_level: INFO
+  log_every_n_iter: 10
+  num_gpu: 1
+  prefetch: 2
+
+train:
+  epochs: 10
+  batch_size_per_gpu: 64
+  learning_rate: 0.0025
+  optimizer: adam
+  optimizer_momentum: 0.9
+  l2_weight_decay: 0.0002
+  piecewise_learning_rate_decay: "1.0,0.1"
+  piecewise_boundaries: "5"
+
+eval:
+  epochs: 1
+  batch_size_per_gpu: 64
+
+infer:
+  epochs: 1
+  batch_size_per_gpu: 1
+
+tune:
+  num_trials: 20
+  fixedparams:
+    train:
+      epochs: 2
+      piecewise_learning_rate_decay: "1.0,0.1"
+      piecewise_boundaries: "1"
+  hyperparams:
+    train:
+      learning_rate: "0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025"
+      optimizer: "momentum,adam,rmsprop"
