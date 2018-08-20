@@ -9,11 +9,14 @@ from __future__ import print_function
 import abc
 import six
 
+from backend.tensorflow.networks import network_factory
+
 
 @six.add_metaclass(abc.ABCMeta)
 class Modeler(object):
   def __init__(self, config):
     self.config = config
+    self.net = network_factory.get_network(self.config["network"])
 
   """Model interfaces for TF backend
   """

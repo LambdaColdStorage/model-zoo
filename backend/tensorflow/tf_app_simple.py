@@ -365,19 +365,49 @@ class TF_App_Simple(tf_app.TF_App):
         _tower_predictions = sess.run(tower_predictions)
         self.modeler.display_prediction_simple(_tower_predictions, test_samples)
 
-
   def inspect(self):
     """Inspect interface
     """
+    bs_per_gpu = self.config["train"]["batch_size_per_gpu"]
+    num_gpu = self.config["run_config"]["num_gpu"]
+    max_steps = 8
+
+    batch = self.inputter.input_fn("train")
+
     if True:
-      item = self.inputter.input_fn("train")
       with tf.Session() as sess:
         sess.run(tf.initialize_all_tables())
         sess.run(tf.global_variables_initializer())
-        for i_run in range(10):
-          _item = sess.run(item)
+        for i_run in range(max_steps):
+          _batch = sess.run(batch)
           print(i_run)
-          print(_item)
+          print(_batch[0].shape)
+          print(_batch[1].shape)
+
+    if False:
+      # Build training graph
+      with tf.device("/cpu:0"):
+        batch = self.inputter.input_fn("train")
+        global_step = tf.train.get_or_create_global_step()
+        learning_rate = self.create_learning_rate_fn(global_step)
+
+        for i in range(num_gpu):
+          with tf.device(assign_to_device("/gpu:{}".format(i),
+                         ps_device="/cpu:0")):
+            _x = batch[0][i * bs_per_gpu:(i + 1) * bs_per_gpu]
+            _y = batch[1][i * bs_per_gpu:(i + 1) * bs_per_gpu]
+
+            logits, predictions = self.modeler.create_graph_fn("train", _x)
+
+            # Compute per-gpu loss and gradient
+            loss = self.modeler.create_loss_fn(logits, _y)
+
+            if i == 0:
+              # Compute training accuracy from the first GPU
+              training_accuracy = \
+                self.modeler.create_eval_metrics_fn(predictions, _y)
+              tf.summary.scalar("training_accuracy", training_accuracy)
+
 
 def build(config):
   """Returns the constructor of the application

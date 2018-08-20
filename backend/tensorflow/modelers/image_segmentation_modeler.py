@@ -6,46 +6,51 @@ Licensed under
 Implement TF modeler interfaces for image segmentation.
 """
 from __future__ import print_function
-import numpy as np
 
 import tensorflow as tf
 
 from backend.tensorflow.modelers import modeler
-from backend.tensorflow.networks import network_factory
 
 
 class Modeler(modeler.Modeler):
   def __init__(self, config):
     super(Modeler, self).__init__(config)
-    # self.net = network_factory.get_network(self.config["network"])
 
   def create_loss_fn(self, logits, labels):
     """Create loss operator
     Returns:
       loss
     """
-    pass
-    # loss_cross_entropy = tf.losses.softmax_cross_entropy(
-    #   logits=logits, onehot_labels=labels)
+    logits = tf.reshape(logits, [-1, self.config['data']['num_classes']])
+    labels = tf.reshape(labels, [-1])
+    labels = tf.cast(labels, tf.int32)
 
-    # loss_l2 = self.config["train"]["l2_weight_decay"] * tf.add_n(
-    #   [tf.nn.l2_loss(v) for v in tf.trainable_variables()])
+    loss_cross_entropy = tf.losses.sparse_softmax_cross_entropy(
+      logits=logits, labels=labels)
 
-    # loss = tf.identity(loss_cross_entropy + loss_l2, "total_loss")
+    l2_var_list = [v for v in tf.trainable_variables()]
+    if "skip_l2_var_list" in self.config["train"]:
+      l2_var_list = [v for v in l2_var_list
+                     if not any(x in v.name for
+                                x in self.config["train"]["skip_l2_var_list"])]
 
-    # return loss
+    loss_l2 = self.config["train"]["l2_weight_decay"] * tf.add_n(
+      [tf.nn.l2_loss(v) for v in l2_var_list])
+
+    loss = tf.identity(loss_cross_entropy + loss_l2, "total_loss")
+
+    return loss
 
   def create_eval_metrics_fn(self, predictions, labels):
     """ Create the evaluation metric
     Returns:
       A dictionary of metrics used by estimator.
     """
-    pass
-    # equality = tf.equal(predictions["classes"],
-    #                     tf.argmax(labels, axis=1))
-    # accuracy = tf.reduce_mean(tf.cast(equality, tf.float32))
+    equality = tf.equal(predictions["classes"],
+                        labels)
+    accuracy = tf.reduce_mean(tf.cast(equality, tf.float32))
 
-    # return accuracy
+    return accuracy
 
   def create_eval_metrics_fn_estimator(self, predictions, labels):
     """ Create the evaluation metric
@@ -88,20 +93,10 @@ class Modeler(modeler.Modeler):
       logits: A tensorf holds the raw outputs of the network.
       predictions: A dictionary hold post-processed results.
     """
-    pass
-    # is_training = (mode == "train")
-    # num_classes = self.config["data"]["num_classes"]
+    is_training = (mode == "train")
+    num_classes = self.config["data"]["num_classes"]
 
-    # logits, end_points = self.net(inputs,
-    #                               num_classes,
-    #                               is_training=is_training)
-
-    # predictions = {
-    #   "classes": tf.argmax(logits, axis=1),
-    #   "probabilities": end_points["predictions"]
-    # }
-
-    # return logits, predictions
+    return self.net(inputs, num_classes, is_training=is_training)
 
   def display_prediction_simple(self, predictions, sample=None):
     """Displays predcition result for simple API

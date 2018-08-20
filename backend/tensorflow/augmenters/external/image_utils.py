@@ -1,6 +1,6 @@
 # Copyright 2018 Lambda Labs. All Rights Reserved.
 # Licensed under
-# ============================================================================
+# =====================================================================fl=======
 
 """A curate of image processing functions implemented in tensorflow
 """
@@ -160,7 +160,7 @@ def central_crop(image_list, crop_height, crop_width):
     offset_width = (image_width - crop_width) / 2
 
     outputs.append(crop(image, offset_height, offset_width,
-                         crop_height, crop_width))
+                        crop_height, crop_width))
   return outputs
 
 

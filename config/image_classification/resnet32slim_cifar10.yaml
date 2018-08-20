@@ -37,6 +37,7 @@ train:
   optimizer: momentum
   optimizer_momentum: 0.9
   l2_weight_decay: 0.0002
+  skip_l2_var_list: ["BatchNorm","preact","postnorm"]
   piecewise_learning_rate_decay: "1.0,0.1"
   piecewise_boundaries: "5"
 

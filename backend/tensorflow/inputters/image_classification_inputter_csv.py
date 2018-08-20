@@ -8,31 +8,28 @@ Implement TF inputter interfaces for image classification (real data)
 from __future__ import print_function
 import os
 import csv
-import importlib
 
 import tensorflow as tf
 
 from backend.tensorflow.inputters import inputter
-from backend.tensorflow.augmenters import augmenter_factory
+
 
 class Inputter(inputter.Inputter):
   def __init__(self, config):
     super(Inputter, self).__init__(config)
-    self.augmenter = augmenter_factory.get_augmenter(self.config["augmenter"])
-
 
   def input_fn(self, mode, test_samples=[]):
     """Implementation of input_fn
     Returns:
       A data generator used by estimator.
-    """    
+    """
     if mode is "infer":
       num_samples = len(test_samples)
       meta_filename = None
     else:
       num_samples = self.config["data"][mode + "_num_samples"]
       meta_filename = (self.config["data"]["dir"] + "/" +
-                 self.config["data"][mode + "_meta"])
+                       self.config["data"][mode + "_meta"])
 
     batch_size = self.config[mode]["batch_size"]
     epochs = self.config[mode]["epochs"]
@@ -52,13 +49,13 @@ class Inputter(inputter.Inputter):
 
     dataset = dataset.map(
       lambda image, label: self.parse_fn(mode, image, label),
-      num_parallel_calls=6)
+      num_parallel_calls=4)
 
     dataset = dataset.apply(
         tf.contrib.data.batch_and_drop_remainder(batch_size))
 
     # Add this to control the length of experiment by total_examples
-    # Useful for hyper-parameter search with shorter experiments 
+    # Useful for hyper-parameter search with shorter experiments
     dataset = dataset.take(max_steps)
 
     # Add prefetch
@@ -91,17 +88,8 @@ class Inputter(inputter.Inputter):
       return (images_path, labels)
 
     else:
-      unknow_mode(mode)
-
-  def preprocessing(self, image, mode):
-    """Default preprocess for image classification
-    """
-    is_training = (mode == "train")
-    return self.augmenter(image,
-                          self.config["data"]["height"],
-                          self.config["data"]["width"],
-                          is_training)
-
+      assert False, \
+        "Unknown image classification inputter mode: {}".format(mode)
 
   def parse_fn(self, mode, image_path, label):
     """Parse a single input sample
@@ -111,7 +99,11 @@ class Inputter(inputter.Inputter):
                                  channels=self.config["data"]["depth"],
                                  dct_method="INTEGER_ACCURATE")
 
-    image = self.preprocessing(image, mode)
+    is_training = (mode == "train")
+    image = self.augmenter(image,
+                           self.config["data"]["height"],
+                           self.config["data"]["width"],
+                           is_training)
 
     label = tf.one_hot(label, depth=self.config["data"]["num_classes"])
 

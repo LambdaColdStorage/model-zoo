@@ -6,18 +6,15 @@ Licensed under
 Implement TF modeler interfaces for image classification.
 """
 from __future__ import print_function
-import numpy as np
 
 import tensorflow as tf
 
 from backend.tensorflow.modelers import modeler
-from backend.tensorflow.networks import network_factory
 
 
 class Modeler(modeler.Modeler):
   def __init__(self, config):
     super(Modeler, self).__init__(config)
-    self.net = network_factory.get_network(self.config["network"])
 
   def create_loss_fn(self, logits, labels):
     """Create loss operator
@@ -27,8 +24,14 @@ class Modeler(modeler.Modeler):
     loss_cross_entropy = tf.losses.softmax_cross_entropy(
       logits=logits, onehot_labels=labels)
 
+    l2_var_list = [v for v in tf.trainable_variables()]
+    if "skip_l2_var_list" in self.config["train"]:
+      l2_var_list = [v for v in l2_var_list
+                     if not any(x in v.name for
+                                x in self.config["train"]["skip_l2_var_list"])]
+
     loss_l2 = self.config["train"]["l2_weight_decay"] * tf.add_n(
-      [tf.nn.l2_loss(v) for v in tf.trainable_variables()])
+      [tf.nn.l2_loss(v) for v in l2_var_list])
 
     loss = tf.identity(loss_cross_entropy + loss_l2, "total_loss")
 

@@ -62,9 +62,6 @@ class Inputter(inputter.Inputter):
   def get_samples_fn(self, *argv):
     pass
 
-  def preprocessing(self, *argv):
-    pass
-
   def parse_fn(self, mode, *argv):
     pass
 
