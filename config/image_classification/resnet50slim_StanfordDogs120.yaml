@@ -37,8 +37,8 @@ train:
   optimizer: momentum
   optimizer_momentum: 0.9
   l2_weight_decay: 0.0002
-  piecewise_learning_rate_decay: '1.0,0.1'
-  piecewise_boundaries: '10'
+  piecewise_learning_rate_decay: "1.0,0.1"
+  piecewise_boundaries: "10"
   restore_ckpt: "/home/chuan/models/resnet_v2_50_2017_04_14"
   skip_restore_var_list: ["resnet_v2_50/logits","step"]
   trainable_var_list: ["resnet_v2_50/logits"]
@@ -56,9 +56,9 @@ tune:
   fixedparams:
     train:
       epochs: 4
-      piecewise_learning_rate_decay: '1.0,0.1'
-      piecewise_boundaries: '2'
+      piecewise_learning_rate_decay: "1.0,0.1"
+      piecewise_boundaries: "2"
   hyperparams:
     train:
-      learning_rate: '0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025'
-      optimizer: 'momentum,adam,rmsprop'
+      learning_rate: "0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025"
+      optimizer: "momentum,adam,rmsprop"

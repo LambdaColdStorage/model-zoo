@@ -15,7 +15,7 @@ import tensorflow as tf
 from backend.tensorflow import tf_app
 
 
-PS_OPS = ['Variable', 'VariableV2', 'AutoReloadVariable']
+PS_OPS = ["Variable", "VariableV2", "AutoReloadVariable"]
 
 
 def assign_to_device(device, ps_device="/cpu:0"):
@@ -38,15 +38,15 @@ def average_gradients(tower_grads):
       # Add 0 dimension to the gradients to represent the tower.
       expanded_g = tf.expand_dims(g, 0)
 
-      # Append on a 'tower' dimension which we will average over below.
+      # Append on a "tower" dimension which we will average over below.
       grads.append(expanded_g)
 
-    # Average over the 'tower' dimension.
+    # Average over the "tower" dimension.
     grad = tf.concat(grads, 0)
     grad = tf.reduce_mean(grad, 0)
 
     # Keep in mind that the Variables are redundant because they are shared
-    # across towers. So we will just return the first tower's pointer to
+    # across towers. So we will just return the first tower"s pointer to
     # the Variable.
     v = grad_and_vars[0][1]
     grad_and_var = (grad, v)
@@ -79,7 +79,7 @@ class TF_App_Simple(tf_app.TF_App):
     save_summary_steps = self.config["run_config"]["save_summary_steps"]
     save_checkpoints_steps = \
         self.config["run_config"]["save_checkpoints_steps"]
-    num_gpu = self.config['run_config']['num_gpu']
+    num_gpu = self.config["run_config"]["num_gpu"]
 
     max_steps = (self.config["data"]["train_num_samples"] *
                  self.config["train"]["epochs"] //
@@ -105,7 +105,7 @@ class TF_App_Simple(tf_app.TF_App):
 
           # Initialize variables from a pre-trained ckpt
           if "restore_ckpt" in self.config["train"]:
-            variables_to_restore = {v.name.split(':')[0]: v
+            variables_to_restore = {v.name.split(":")[0]: v
                                     for v in tf.get_collection(
                                         tf.GraphKeys.GLOBAL_VARIABLES)}
 
@@ -114,7 +114,7 @@ class TF_App_Simple(tf_app.TF_App):
                 v: variables_to_restore[v] for
                 v in variables_to_restore if not
                 any(x in v for
-                    x in self.config['train']['skip_restore_var_list'])}
+                    x in self.config["train"]["skip_restore_var_list"])}
 
           # Pin the trainable variables
           train_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
@@ -250,8 +250,8 @@ class TF_App_Simple(tf_app.TF_App):
       os.makedirs(eval_dir)
 
     # Comput miscellaneous
-    bs_per_gpu = self.config['eval']['batch_size_per_gpu']
-    num_gpu = self.config['run_config']['num_gpu']
+    bs_per_gpu = self.config["eval"]["batch_size_per_gpu"]
+    num_gpu = self.config["run_config"]["num_gpu"]
     max_steps = (self.config["data"]["eval_num_samples"] *
                  self.config["eval"]["epochs"] //
                  self.config["eval"]["batch_size"])
@@ -260,19 +260,19 @@ class TF_App_Simple(tf_app.TF_App):
     steps_per_log = max_steps // num_log
 
     # Build evaluation graph
-    with tf.device('/cpu:0'):
+    with tf.device("/cpu:0"):
       global_step = tf.train.get_or_create_global_step()
 
-      batch = self.inputter.input_fn('eval')
+      batch = self.inputter.input_fn("eval")
       tower_accuracies = []
 
       for i in range(num_gpu):
-        with tf.device(assign_to_device('/gpu:{}'.format(i),
-                       ps_device='/cpu:0')):
+        with tf.device(assign_to_device("/gpu:{}".format(i),
+                       ps_device="/cpu:0")):
           _x = batch[0][i * bs_per_gpu:(i + 1) * bs_per_gpu]
           _y = batch[1][i * bs_per_gpu:(i + 1) * bs_per_gpu]
 
-          logits, predictions = self.modeler.create_graph_fn('eval', _x)
+          logits, predictions = self.modeler.create_graph_fn("eval", _x)
 
           eval_accuracy = self.modeler.create_eval_metrics_fn(predictions, _y)
           tower_accuracies.append(eval_accuracy)
@@ -280,19 +280,19 @@ class TF_App_Simple(tf_app.TF_App):
       accuracy = average_accuracies(tower_accuracies)
 
     saver = tf.train.Saver(
-      max_to_keep=self.config['run_config']['keep_checkpoint_max'])
+      max_to_keep=self.config["run_config"]["keep_checkpoint_max"])
 
     # Run evaluation
     with tf.Session(config=self.session_config) as sess:
       sess.run(tf.global_variables_initializer())
 
       if tf.train.checkpoint_exists(
-        self.config['model']['dir'] + "/model.*"):
+        self.config["model"]["dir"] + "/model.*"):
         saver.restore(sess,
                       tf.train.latest_checkpoint(
-                        self.config['model']['dir']))
+                        self.config["model"]["dir"]))
       else:
-        raise ValueError('Can not find any checkpoint.')
+        raise ValueError("Can not find any checkpoint.")
 
       trained_step = sess.run(global_step)
 
@@ -323,43 +323,43 @@ class TF_App_Simple(tf_app.TF_App):
     tf.reset_default_graph()
 
     # Comput miscellaneous
-    bs_per_gpu = self.config['infer']['batch_size_per_gpu']
-    num_gpu = self.config['run_config']['num_gpu']
+    bs_per_gpu = self.config["infer"]["batch_size_per_gpu"]
+    num_gpu = self.config["run_config"]["num_gpu"]
     max_steps = (len(test_samples) //
                  self.config["infer"]["batch_size"])
 
     # Build evaluation graph
-    with tf.device('/cpu:0'):
+    with tf.device("/cpu:0"):
       global_step = tf.train.get_or_create_global_step()
 
-      batch = self.inputter.input_fn('infer', test_samples)
+      batch = self.inputter.input_fn("infer", test_samples)
 
       tower_predictions = []
 
       for i in range(num_gpu):
-        with tf.device(assign_to_device('/gpu:{}'.format(i),
-                       ps_device='/cpu:0')):
+        with tf.device(assign_to_device("/gpu:{}".format(i),
+                       ps_device="/cpu:0")):
           _x = batch[0][i * bs_per_gpu:(i + 1) * bs_per_gpu]
           _y = batch[1][i * bs_per_gpu:(i + 1) * bs_per_gpu]
 
-          logits, predictions = self.modeler.create_graph_fn('infer', _x)
+          logits, predictions = self.modeler.create_graph_fn("infer", _x)
 
           tower_predictions.append(predictions)
 
     saver = tf.train.Saver(
-      max_to_keep=self.config['run_config']['keep_checkpoint_max'])
+      max_to_keep=self.config["run_config"]["keep_checkpoint_max"])
 
     # Run evaluation
     with tf.Session(config=self.session_config) as sess:
       sess.run(tf.global_variables_initializer())
 
       if tf.train.checkpoint_exists(
-        self.config['model']['dir'] + "/model.*"):
+        self.config["model"]["dir"] + "/model.*"):
         saver.restore(sess,
                       tf.train.latest_checkpoint(
-                        self.config['model']['dir']))
+                        self.config["model"]["dir"]))
       else:
-        raise ValueError('Can not find any checkpoint.')
+        raise ValueError("Can not find any checkpoint.")
 
       for step in range(max_steps):
         _tower_predictions = sess.run(tower_predictions)

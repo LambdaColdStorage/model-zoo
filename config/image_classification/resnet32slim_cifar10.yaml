@@ -1,5 +1,5 @@
 backend: tensorflow
-app: tf_app_simple
+app: tf_app_estimator
 modeler: image_classification_modeler
 network: resnet32slim
 inputter: image_classification_inputter_csv
@@ -37,8 +37,8 @@ train:
   optimizer: momentum
   optimizer_momentum: 0.9
   l2_weight_decay: 0.0002
-  piecewise_learning_rate_decay: '1.0,0.1'
-  piecewise_boundaries: '5'
+  piecewise_learning_rate_decay: "1.0,0.1"
+  piecewise_boundaries: "5"
 
 eval:
   epochs: 1
@@ -53,9 +53,9 @@ tune:
   fixedparams:
     train:
       epochs: 2
-      piecewise_learning_rate_decay: '1.0,0.1'
-      piecewise_boundaries: '1'
+      piecewise_learning_rate_decay: "1.0,0.1"
+      piecewise_boundaries: "1"
   hyperparams:
     train:
-      learning_rate: '0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025'
-      optimizer: 'momentum,adam,rmsprop'
+      learning_rate: "0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025"
+      optimizer: "momentum,adam,rmsprop"

@@ -52,16 +52,16 @@ class Modeler(modeler.Modeler):
     """
     accuracy = tf.metrics.accuracy(
       tf.argmax(labels, axis=1),
-      predictions['classes'])
+      predictions["classes"])
 
     # for logging in the console during training
-    tf.identity(accuracy[1], name='running_accuracy')
+    tf.identity(accuracy[1], name="running_accuracy")
 
     # for tensorboard train_accuracy
-    tf.summary.scalar('train_accuracy', accuracy[1])
+    tf.summary.scalar("train_accuracy", accuracy[1])
 
     # for tensorboard eval_accuracy (only run by estimator.eval)
-    metrics = {'eval_accuracy': accuracy}
+    metrics = {"eval_accuracy": accuracy}
 
     return metrics
 
@@ -69,13 +69,13 @@ class Modeler(modeler.Modeler):
     """Returns a list of training hooks
     """
     tensors_to_log = {
-      'running_accuracy': 'running_accuracy',
-      'total_loss': 'total_loss',
-      'step': 'step'}
+      "running_accuracy": "running_accuracy",
+      "total_loss": "total_loss",
+      "step": "step"}
 
     logging_hook = tf.train.LoggingTensorHook(
       tensors=tensors_to_log,
-      every_n_iter=self.config['run_config']['log_every_n_iter'])
+      every_n_iter=self.config["run_config"]["log_every_n_iter"])
     return [logging_hook]
 
   def create_graph_fn(self, mode, inputs):
@@ -116,10 +116,10 @@ class Modeler(modeler.Modeler):
     prediction: a dictinary that has a probabilities field and a classes field.
     Each of these fields represent a single result.
     """
-    print('class: ' +
-          str(prediction['classes']) +
-          ', probability: ' +
-          str(prediction['probabilities'][prediction['classes']]))
+    print("class: " +
+          str(prediction["classes"]) +
+          ", probability: " +
+          str(prediction["probabilities"][prediction["classes"]]))
 
 
 def build(config):

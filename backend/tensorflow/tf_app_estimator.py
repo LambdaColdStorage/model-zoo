@@ -18,16 +18,16 @@ class TF_App_Estimator(tf_app.TF_App):
 
     self.run_config = tf.estimator.RunConfig(
       session_config=self.session_config,
-      model_dir=self.config['model']['dir'],
-      save_summary_steps=self.config["run_config"]['save_summary_steps'],
-      save_checkpoints_steps=self.config["run_config"]['save_checkpoints_steps'],
-      keep_checkpoint_max=self.config["run_config"]['keep_checkpoint_max'],
-      log_step_count_steps=self.config["run_config"]['log_every_n_iter'],
+      model_dir=self.config["model"]["dir"],
+      save_summary_steps=self.config["run_config"]["save_summary_steps"],
+      save_checkpoints_steps=self.config["run_config"]["save_checkpoints_steps"],
+      keep_checkpoint_max=self.config["run_config"]["keep_checkpoint_max"],
+      log_step_count_steps=self.config["run_config"]["log_every_n_iter"],
       train_distribute=None)
 
     devices = []
-    for i in range(self.config['run_config']['num_gpu']):
-      devices.append(u'/device:GPU:' + str(i))
+    for i in range(self.config["run_config"]["num_gpu"]):
+      devices.append(u"/device:GPU:" + str(i))
 
     model_fn = (tf.contrib.estimator.replicate_model_fn(
                 self.model_fn,
@@ -46,7 +46,7 @@ class TF_App_Estimator(tf_app.TF_App):
       # Setup global step
       global_step = tf.train.get_or_create_global_step()
 
-      tf.identity(global_step, 'step')
+      tf.identity(global_step, "step")
 
       # Setup learning rate
       learning_rate = self.create_learning_rate_fn(global_step)
@@ -58,11 +58,11 @@ class TF_App_Estimator(tf_app.TF_App):
 
       # Setup train_op
       train_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-      if 'trainable_var_list' in self.config['train']:
+      if "trainable_var_list" in self.config["train"]:
         train_vars = [v for v in train_vars
                       if any(x in v.name
                              for x in
-                             self.config['train']['trainable_var_list'])]
+                             self.config["train"]["trainable_var_list"])]
 
       update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
@@ -88,18 +88,18 @@ class TF_App_Estimator(tf_app.TF_App):
       # Early return if in PREDICT mode
       return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
     elif mode == tf.estimator.ModeKeys.TRAIN:
-      # Restore from ckpt in Train if self.config['train']['restore_ckpt'] is not none
+      # Restore from ckpt in Train if self.config["train"]["restore_ckpt"] is not none
       # This is better than warmstart, which does not restore moving
       # statistics for batchnorm
-      if "restore_ckpt" in self.config['train']:
-        variables_to_restore = {v.name.split(':')[0]: v
+      if "restore_ckpt" in self.config["train"]:
+        variables_to_restore = {v.name.split(":")[0]: v
                                 for v in tf.get_collection(
                                     tf.GraphKeys.GLOBAL_VARIABLES)}
-        if self.config['train']['skip_restore_var_list'] is not None:
+        if self.config["train"]["skip_restore_var_list"] is not None:
           variables_to_restore = {v: v for v in variables_to_restore
                                   if not any(x in v for x in
-                                             self.config['train']['skip_restore_var_list'])}
-        tf.train.init_from_checkpoint(self.config['train']['restore_ckpt'],
+                                             self.config["train"]["skip_restore_var_list"])}
+        tf.train.init_from_checkpoint(self.config["train"]["restore_ckpt"],
                                       variables_to_restore)
 
     # Create the loss

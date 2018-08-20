@@ -8,12 +8,12 @@ def parse_config(config_path):
   """
   with open(config_path) as file:
     config = yaml.load(file.read())
-  config['train']['batch_size'] = config['train']['batch_size_per_gpu'] * \
-      config['run_config']['num_gpu']
-  config['eval']['batch_size'] = config['eval']['batch_size_per_gpu'] * \
-      config['run_config']['num_gpu']
-  config['infer']['batch_size'] = config['infer']['batch_size_per_gpu'] * \
-      config['run_config']['num_gpu']
+  config["train"]["batch_size"] = config["train"]["batch_size_per_gpu"] * \
+      config["run_config"]["num_gpu"]
+  config["eval"]["batch_size"] = config["eval"]["batch_size_per_gpu"] * \
+      config["run_config"]["num_gpu"]
+  config["infer"]["batch_size"] = config["infer"]["batch_size_per_gpu"] * \
+      config["run_config"]["num_gpu"]
   return config
 
 
@@ -36,5 +36,5 @@ def parse_test(args):
         samples.append(clean)
   else:
     # Strip the white space from the samples
-    samples = [x for x in args.test_samples.split(',')]
+    samples = [x for x in args.test_samples.split(",")]
   return samples

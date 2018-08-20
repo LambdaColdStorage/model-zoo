@@ -24,7 +24,7 @@ class Inputter(inputter.Inputter):
       batch_size = self.config["eval"]["batch_size"]
     else:
       assert False, \
-        "Unknown mode for image_classifcation_inputter_syn: '{}'".format(mode)
+        "Unknown mode for image_classifcation_inputter_syn: {}".format(mode)
 
     max_steps = (self.config["data"]["train_num_samples"] *
                  self.config["train"]["epochs"] //

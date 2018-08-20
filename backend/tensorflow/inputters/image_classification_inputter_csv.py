@@ -31,8 +31,8 @@ class Inputter(inputter.Inputter):
       num_samples = len(test_samples)
       meta_filename = None
     else:
-      num_samples = self.config['data'][mode + "_num_samples"]
-      meta_filename = (self.config["data"]["dir"] + '/' +
+      num_samples = self.config["data"][mode + "_num_samples"]
+      meta_filename = (self.config["data"]["dir"] + "/" +
                  self.config["data"][mode + "_meta"])
 
     batch_size = self.config[mode]["batch_size"]
@@ -45,7 +45,7 @@ class Inputter(inputter.Inputter):
 
     if mode == "train":
      dataset = \
-       dataset.shuffle(buffer_size=self.config['data']['train_num_samples'])
+       dataset.shuffle(buffer_size=self.config["data"]["train_num_samples"])
 
     # Call repeat after shuffling, rather than before, to prevent separate
     # epochs blurred boundaries
@@ -80,14 +80,14 @@ class Inputter(inputter.Inputter):
     elif mode == "train" or \
             mode == "eval":
       assert os.path.exists(meta_filename), (
-        'Cannot find ' + meta_filename)
+        "Cannot find " + meta_filename)
 
       images_path = []
       labels = []
       with open(meta_filename) as f:
-        parsed = csv.reader(f, delimiter=',', quotechar="'")
+        parsed = csv.reader(f, delimiter=",", quotechar="'")
         for row in parsed:
-          images_path.append(self.config['data']['dir'] + '/' + row[0])
+          images_path.append(self.config["data"]["dir"] + "/" + row[0])
           labels.append(int(row[1]))
       return (images_path, labels)
 
@@ -97,10 +97,10 @@ class Inputter(inputter.Inputter):
   def preprocessing(self, image, mode):
     """Default preprocess for image classification
     """
-    is_training = (mode == 'train')
+    is_training = (mode == "train")
     return self.augmenter(image,
-                          self.config['data']['height'],
-                          self.config['data']['width'],
+                          self.config["data"]["height"],
+                          self.config["data"]["width"],
                           is_training)
 
 
@@ -109,12 +109,12 @@ class Inputter(inputter.Inputter):
     """
     image = tf.read_file(image_path)
     image = tf.image.decode_jpeg(image,
-                                 channels=self.config['data']['depth'],
-                                 dct_method='INTEGER_ACCURATE')
+                                 channels=self.config["data"]["depth"],
+                                 dct_method="INTEGER_ACCURATE")
 
     image = self.preprocessing(image, mode)
 
-    label = tf.one_hot(label, depth=self.config['data']['num_classes'])
+    label = tf.one_hot(label, depth=self.config["data"]["num_classes"])
 
     return image, label
 

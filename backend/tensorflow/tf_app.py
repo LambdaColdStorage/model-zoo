@@ -23,8 +23,8 @@ class TF_App(app.App):
     self.modeler = importlib.import_module("backend." + config["backend"] + ".modelers." + config["modeler"]).build(config)
     self.inputter = importlib.import_module("backend." + config["backend"] + ".inputters." + config["inputter"]).build(config)
     self.session_config = self.create_session_config()
-    self.batch_size = self.config['train']['batch_size_per_gpu'] * \
-        self.config['run_config']['num_gpu']
+    self.batch_size = self.config["train"]["batch_size_per_gpu"] * \
+        self.config["run_config"]["num_gpu"]
     tf.logging.set_verbosity(tf.logging.INFO)
 
   def create_session_config(self):
@@ -34,11 +34,11 @@ class TF_App(app.App):
                                 allow_growth=True)
 
     # set number of GPU devices
-    device_count = {'GPU': self.config['run_config']['num_gpu']}
+    device_count = {"GPU": self.config["run_config"]["num_gpu"]}
 
     session_config = tf.ConfigProto(
       allow_soft_placement=True,
-      log_device_placement=self.config['run_config']['log_device_placement'],
+      log_device_placement=self.config["run_config"]["log_device_placement"],
       device_count=device_count,
       gpu_options=gpu_options)
 
@@ -77,13 +77,13 @@ class TF_App(app.App):
   def create_learning_rate_fn(self, global_step):
     """Create learning rate
     Returns:
-      A learning rate calcualtor used by TF's optimizer.
+      A learning rate calcualtor used by TF"s optimizer.
     """
     if "piecewise_learning_rate_decay" in self.config["train"]:
       initial_learning_rate = self.config["train"]["learning_rate"]
       batches_per_epoch = (self.config["data"]["train_num_samples"] /
                            (self.config["train"]["batch_size_per_gpu"] *
-                            self.config['run_config']['num_gpu']))
+                            self.config["run_config"]["num_gpu"]))
       boundaries = list(map(float,
                         self.config["train"]["piecewise_boundaries"].split(",")))
       boundaries = [int(batches_per_epoch * boundary) for boundary in boundaries]
@@ -112,11 +112,11 @@ class TF_App(app.App):
     """Hyper-parameter Tuning interface
     """
     def type_convert(s):
-        ''' convert value to int, float or str'''
+        """ convert value to int, float or str"""
         try:
             float(s)
 
-            tp = 1 if s.count('.') == 0 else 2
+            tp = 1 if s.count(".") == 0 else 2
         except ValueError:
             tp = -1
 
@@ -127,35 +127,35 @@ class TF_App(app.App):
         elif tp == -1:
           return v
         else:
-          assert False, "Unknown type for hyper parameter: '{}'".format(tp)
+          assert False, "Unknown type for hyper parameter: {}".format(tp)
 
     # setup the tunning jobs
-    num_trials = self.config['tune']['num_trials']
+    num_trials = self.config["tune"]["num_trials"]
 
-    # update the fixed parameters in self.config['train']
-    for field in list(self.config['tune']['fixedparams'].keys()):
-      for param in list(self.config['tune']['fixedparams'][field].keys()):
+    # update the fixed parameters in self.config["train"]
+    for field in list(self.config["tune"]["fixedparams"].keys()):
+      for param in list(self.config["tune"]["fixedparams"][field].keys()):
         self.config[field][param] = \
-          self.config['tune']['fixedparams'][field][param]
+          self.config["tune"]["fixedparams"][field][param]
 
     # randomly generate hyper parameters for each trail
-    dir_ori = self.config['model']['dir'] + '/tune/tune'
+    dir_ori = self.config["model"]["dir"] + "/tune/tune"
     t = 0
     while t < num_trials:
       dir_update = dir_ori
-      for field in list(self.config['tune']['hyperparams'].keys()):
+      for field in list(self.config["tune"]["hyperparams"].keys()):
         if field in self.config:
-          for param in list(self.config['tune']['hyperparams'][field].keys()):
+          for param in list(self.config["tune"]["hyperparams"][field].keys()):
             if param in self.config[field]:
               values = \
-                self.config['tune']['hyperparams'][field][param].split(',')
+                self.config["tune"]["hyperparams"][field][param].split(",")
               v = random.choice(values)
               self.config[field][param] = type_convert(v)
-              dir_update = dir_update + '_' + param + '_' + str(v)
+              dir_update = dir_update + "_" + param + "_" + str(v)
 
-      # run experiment the same hyper parameters haven't been used before
+      # run experiment the same hyper parameters haven"t been used before
       if not os.path.isdir(dir_update):
-        self.config['model']['dir'] = dir_update
+        self.config["model"]["dir"] = dir_update
         self.train_and_eval()
         # print(dir_update)
         t = t + 1
