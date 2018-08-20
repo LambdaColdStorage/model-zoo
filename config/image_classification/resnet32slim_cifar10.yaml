@@ -1,5 +1,5 @@
 backend: tensorflow
-app: tf_app_estimator
+app: tf_app_simple
 modeler: image_classification_modeler
 network: resnet32slim
 inputter: image_classification_inputter_csv

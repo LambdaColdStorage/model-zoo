@@ -13,7 +13,7 @@ import importlib
 import tensorflow as tf
 from tensorflow.python.util import nest
 
-from backend.tensorflow import inputter
+from backend.tensorflow.inputters import inputter
 from backend.tensorflow.augmenters import augmenter_factory
 
 class Inputter(inputter.Inputter):
