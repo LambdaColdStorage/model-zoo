@@ -10,8 +10,8 @@ import numpy as np
 
 import tensorflow as tf
 
-from backend.tensorflow_backend import modeler
-from backend.tensorflow_backend.networks import network_factory
+from backend.tensorflow import modeler
+from backend.tensorflow.networks import network_factory
 
 
 class Modeler(modeler.Modeler):

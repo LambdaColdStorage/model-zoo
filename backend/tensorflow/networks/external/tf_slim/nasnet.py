@@ -23,7 +23,7 @@ from __future__ import print_function
 import copy
 import tensorflow as tf
 
-from lambdarun.tf_lambda.image_classification.models.slim import nasnet_utils
+from backend.tensorflow.networks.external.tf_slim import nasnet_utils
 
 arg_scope = tf.contrib.framework.arg_scope
 slim = tf.contrib.slim

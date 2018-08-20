@@ -20,8 +20,8 @@ class TF_App(app.App):
     super(TF_App, self).__init__(config)
 
     # A TF application has a modeler and an inputter
-    self.modeler = importlib.import_module(config['modeler']).build(config)
-    self.inputter = importlib.import_module(config['inputter']).build(config)
+    self.modeler = importlib.import_module("backend." + config["backend"] + ".modelers." + config["modeler"]).build(config)
+    self.inputter = importlib.import_module("backend." + config["backend"] + ".inputters." + config["inputter"]).build(config)
     self.session_config = self.create_session_config()
     self.batch_size = self.config['train']['batch_size_per_gpu'] * \
         self.config['run_config']['num_gpu']

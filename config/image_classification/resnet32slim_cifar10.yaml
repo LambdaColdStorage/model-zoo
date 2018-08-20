@@ -1,8 +1,9 @@
-app: backend.tensorflow_backend.tf_app_estimator
-modeler: backend.tensorflow_backend.modelers.image_classification_modeler
+backend: tensorflow
+app: tf_app_simple
+modeler: image_classification_modeler
 network: resnet32slim
-inputter: backend.tensorflow_backend.inputters.image_classification_inputter_csv
-augmenter: backend.tensorflow_backend.augmenters.external.cifarnet_preprocessing
+inputter: image_classification_inputter_csv
+augmenter: cifar
 
 model:
   dir: output/resnet32slim

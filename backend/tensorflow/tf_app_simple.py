@@ -12,7 +12,7 @@ import numpy as np
 
 import tensorflow as tf
 
-from backend.tensorflow_backend import tf_app
+from backend.tensorflow import tf_app
 
 
 PS_OPS = ['Variable', 'VariableV2', 'AutoReloadVariable']

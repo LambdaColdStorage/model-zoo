@@ -9,7 +9,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from backend.tensorflow_backend import tf_app
+from backend.tensorflow import tf_app
 
 
 class TF_App_Estimator(tf_app.TF_App):

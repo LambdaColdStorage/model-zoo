@@ -41,7 +41,7 @@ def main():
   config = app_parser.parse_config(args.config_path)
 
   # Build an application
-  app = importlib.import_module(config['app']).build(config)
+  app = importlib.import_module("backend." + config["backend"] + "." + config["app"]).build(config)
 
   app.run(args)
 

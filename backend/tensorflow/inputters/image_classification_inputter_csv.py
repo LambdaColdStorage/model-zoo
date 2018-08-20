@@ -13,12 +13,14 @@ import importlib
 import tensorflow as tf
 from tensorflow.python.util import nest
 
-from backend.tensorflow_backend import inputter
-
+from backend.tensorflow import inputter
+from backend.tensorflow.augmenters import augmenter_factory
 
 class Inputter(inputter.Inputter):
   def __init__(self, config):
     super(Inputter, self).__init__(config)
+    self.augmenter = augmenter_factory.get_augmenter(self.config["augmenter"])
+
 
   def input_fn(self, mode, test_samples=[]):
     """Implementation of input_fn
@@ -95,16 +97,12 @@ class Inputter(inputter.Inputter):
   def preprocessing(self, image, mode):
     """Default preprocess for image classification
     """
-    if 'augmenter' in self.config:
-      is_training = (mode == 'train')
-      augmenter = importlib.import_module(self.config['augmenter'])
+    is_training = (mode == 'train')
+    return self.augmenter(image,
+                          self.config['data']['height'],
+                          self.config['data']['width'],
+                          is_training)
 
-      return augmenter.preprocess_image(image,
-                                        self.config['data']['height'],
-                                        self.config['data']['width'],
-                                        is_training)
-    else:
-      return tf.to_float(image)
 
   def parse_fn(self, mode, image_path, label):
     """Parse a single input sample

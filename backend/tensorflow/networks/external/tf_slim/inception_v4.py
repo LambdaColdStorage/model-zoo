@@ -26,7 +26,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from lambdarun.tf_lambda.image_classification.models.slim import inception_utils
+from backend.tensorflow.networks.external.tf_slim import inception_utils
 
 slim = tf.contrib.slim
 

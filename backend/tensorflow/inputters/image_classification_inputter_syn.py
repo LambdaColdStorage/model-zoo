@@ -10,7 +10,7 @@ from __future__ import print_function
 import tensorflow as tf
 from tensorflow.python.util import nest
 
-from backend.tensorflow_backend import inputter
+from backend.tensorflow import inputter
 
 
 class Inputter(inputter.Inputter):
