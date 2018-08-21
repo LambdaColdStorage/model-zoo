@@ -90,16 +90,7 @@ class Modeler(modeler.Modeler):
     is_training = (mode == "train")
     num_classes = self.config["data"]["num_classes"]
 
-    logits, end_points = self.net(inputs,
-                                  num_classes,
-                                  is_training=is_training)
-
-    predictions = {
-      "classes": tf.argmax(logits, axis=1),
-      "probabilities": end_points["predictions"]
-    }
-
-    return logits, predictions
+    return self.net(inputs, num_classes, is_training=is_training)
 
   def display_prediction_simple(self, predictions, sample=None):
     """Displays predcition result for simple API

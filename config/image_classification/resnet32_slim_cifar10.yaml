@@ -1,0 +1,62 @@
+backend: tensorflow
+app: tf_app_simple
+modeler: image_classification_modeler
+network: resnet32_slim
+inputter: image_classification_inputter_csv
+augmenter: cifar
+
+model:
+  dir: output/resnet32_slim
+
+data:
+  height: 32
+  width: 32
+  depth: 3
+  num_classes: 10
+  train_num_samples: 50000
+  eval_num_samples: 10000
+  dir: data/cifar10
+  train_meta: train.csv
+  eval_meta: eval.csv  
+
+run_config:  
+  winograd_nonfused: True
+  log_device_placement: False
+  save_summary_steps: 100
+  save_checkpoints_steps: 200
+  keep_checkpoint_max: 5
+  log_level: INFO
+  log_every_n_iter: 10
+  num_gpu: 1
+  prefetch: 2
+
+train:
+  epochs: 10
+  batch_size_per_gpu: 256
+  learning_rate: 0.01
+  optimizer: momentum
+  optimizer_momentum: 0.9
+  l2_weight_decay: 0.0002
+  skip_l2_var_list: ["BatchNorm","preact","postnorm"]
+  piecewise_learning_rate_decay: "1.0,0.1"
+  piecewise_boundaries: "5"
+
+eval:
+  epochs: 1
+  batch_size_per_gpu: 128
+
+infer:
+  epochs: 1
+  batch_size_per_gpu: 1
+
+tune:
+  num_trials: 20
+  fixedparams:
+    train:
+      epochs: 2
+      piecewise_learning_rate_decay: "1.0,0.1"
+      piecewise_boundaries: "1"
+  hyperparams:
+    train:
+      learning_rate: "0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025"
+      optimizer: "momentum,adam,rmsprop"

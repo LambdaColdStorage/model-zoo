@@ -30,27 +30,30 @@ def assign_to_device(device, ps_device="/cpu:0"):
 
 def average_gradients(tower_grads):
   average_grads = []
+
   for grad_and_vars in zip(*tower_grads):
     # Note that each grad_and_vars looks like the following:
     #   ((grad0_gpu0, var0_gpu0), ... , (grad0_gpuN, var0_gpuN))
     grads = []
     for g, _ in grad_and_vars:
-      # Add 0 dimension to the gradients to represent the tower.
-      expanded_g = tf.expand_dims(g, 0)
+      if g is not None:
+        # Add 0 dimension to the gradients to represent the tower.
+        expanded_g = tf.expand_dims(g, 0)
 
-      # Append on a "tower" dimension which we will average over below.
-      grads.append(expanded_g)
+        # Append on a "tower" dimension which we will average over below.
+        grads.append(expanded_g)
 
-    # Average over the "tower" dimension.
-    grad = tf.concat(grads, 0)
-    grad = tf.reduce_mean(grad, 0)
+    if grads:
+      # Average over the "tower" dimension.
+      grad = tf.concat(grads, 0)
+      grad = tf.reduce_mean(grad, 0)
 
-    # Keep in mind that the Variables are redundant because they are shared
-    # across towers. So we will just return the first tower"s pointer to
-    # the Variable.
-    v = grad_and_vars[0][1]
-    grad_and_var = (grad, v)
-    average_grads.append(grad_and_var)
+      # Keep in mind that the Variables are redundant because they are shared
+      # across towers. So we will just return the first tower"s pointer to
+      # the Variable.
+      v = grad_and_vars[0][1]
+      grad_and_var = (grad, v)
+      average_grads.append(grad_and_var)
   return average_grads
 
 
@@ -374,7 +377,7 @@ class TF_App_Simple(tf_app.TF_App):
 
     batch = self.inputter.input_fn("train")
 
-    if True:
+    if False:
       with tf.Session() as sess:
         sess.run(tf.initialize_all_tables())
         sess.run(tf.global_variables_initializer())
@@ -407,6 +410,27 @@ class TF_App_Simple(tf_app.TF_App):
               training_accuracy = \
                 self.modeler.create_eval_metrics_fn(predictions, _y)
               tf.summary.scalar("training_accuracy", training_accuracy)
+
+    if True:
+      # Build training graph
+      with tf.device("/cpu:0"):
+        batch = self.inputter.input_fn("train")
+
+        for i in range(num_gpu):
+          with tf.device(assign_to_device("/gpu:{}".format(i),
+                         ps_device="/cpu:0")):
+            _x = batch[0][i * bs_per_gpu:(i + 1) * bs_per_gpu]
+            _y = batch[1][i * bs_per_gpu:(i + 1) * bs_per_gpu]
+
+            logits, predictions = self.modeler.create_graph_fn("train", _x)
+
+            l2_var_list = [v for v in tf.trainable_variables()]
+            if "skip_l2_var_list" in self.config["train"]:
+              l2_var_list = [v for v in l2_var_list
+                             if not any(x in v.name for
+                                        x in self.config["train"]["skip_l2_var_list"])]
+            for v in l2_var_list:
+              print(v.name)
 
 
 def build(config):

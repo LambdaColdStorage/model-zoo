@@ -1,12 +1,12 @@
 backend: tensorflow
 app: tf_app_simple
 modeler: image_classification_modeler
-network: resnet50slim
+network: resnet50_slim
 inputter: image_classification_inputter_csv
 augmenter: vgg
 
 model:
-  dir: output/resnet50slim
+  dir: output/resnet50_slim
 
 data:
   height: 224
@@ -27,7 +27,7 @@ run_config:
   keep_checkpoint_max: 5
   log_level: INFO
   log_every_n_iter: 10
-  num_gpu: 1
+  num_gpu: 4
   prefetch: 2
 
 train:

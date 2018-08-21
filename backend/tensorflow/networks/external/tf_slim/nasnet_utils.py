@@ -306,7 +306,7 @@ class NasNetABaseCell(object):
     self._filter_size = int(self._num_conv_filters * filter_scaling)
 
     i = 0
-    with tf.variable_scope(scope):
+    with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
       net = self._cell_base(net, prev_layer)
       for iteration in range(5):
         with tf.variable_scope('comb_iter_{}'.format(iteration)):

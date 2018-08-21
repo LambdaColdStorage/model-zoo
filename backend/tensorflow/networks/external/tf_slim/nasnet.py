@@ -221,9 +221,9 @@ def nasnet_large_arg_scope(weight_decay=5e-5,
           return sc
 
 
-def _build_aux_head(net, end_points, num_classes, hparams, scope):
+def _build_aux_head(net, end_points, num_classes, hparams, scope, reuse=tf.AUTO_REUSE):
   """Auxiliary head used for all models across all datasets."""
-  with tf.variable_scope(scope):
+  with tf.variable_scope(scope, reuse=reuse):
     aux_logits = tf.identity(net)
     with tf.variable_scope('aux_logits'):
       aux_logits = slim.avg_pool2d(
@@ -245,7 +245,7 @@ def _build_aux_head(net, end_points, num_classes, hparams, scope):
       end_points['AuxLogits'] = aux_logits
 
 
-def _imagenet_stem(inputs, hparams, stem_cell):
+def _imagenet_stem(inputs, hparams, stem_cell, reuse=tf.AUTO_REUSE):
   """Stem used for models trained on ImageNet."""
   num_stem_cells = 2
 
@@ -253,8 +253,8 @@ def _imagenet_stem(inputs, hparams, stem_cell):
   num_stem_filters = int(32 * hparams.stem_multiplier)
   net = slim.conv2d(
       inputs, num_stem_filters, [3, 3], stride=2, scope='conv0',
-      padding='VALID')
-  net = slim.batch_norm(net, scope='conv0_bn')
+      padding='VALID', reuse=reuse)
+  net = slim.batch_norm(net, scope='conv0_bn', reuse=reuse)
 
   # Run the reduction cells
   cell_outputs = [None, net]
@@ -272,15 +272,16 @@ def _imagenet_stem(inputs, hparams, stem_cell):
   return net, cell_outputs
 
 
-def _cifar_stem(inputs, hparams):
+def _cifar_stem(inputs, hparams, reuse=tf.AUTO_REUSE):
   """Stem used for models trained on Cifar."""
   num_stem_filters = int(hparams.num_conv_filters * hparams.stem_multiplier)
   net = slim.conv2d(
       inputs,
       num_stem_filters,
       3,
-      scope='l1_stem_3x3')
-  net = slim.batch_norm(net, scope='l1_stem_bn')
+      scope='l1_stem_3x3',
+      reuse=reuse)
+  net = slim.batch_norm(net, scope='l1_stem_bn', reuse=reuse)
   return net, [None, net]
 
 
@@ -439,7 +440,8 @@ def _build_nasnet_base(images,
                        hparams,
                        is_training,
                        stem_type,
-                       final_endpoint=None):
+                       final_endpoint=None,
+                       reuse=tf.AUTO_REUSE):
   """Constructs a NASNet image model."""
 
   end_points = {}
@@ -509,7 +511,7 @@ def _build_nasnet_base(images,
     cell_outputs.append(net)
 
   # Final softmax layer
-  with tf.variable_scope('final_layer'):
+  with tf.variable_scope('final_layer', reuse=reuse):
     net = tf.nn.relu(net)
     net = nasnet_utils.global_avg_pool(net)
     if add_and_check_endpoint('global_pool', net) or not num_classes:
