@@ -384,6 +384,7 @@ class TF_App_Simple(tf_app.TF_App):
         for i_run in range(max_steps):
           _batch = sess.run(batch)
           print(i_run)
+          # print(_batch)
           print(_batch[0].shape)
           print(_batch[1].shape)
 

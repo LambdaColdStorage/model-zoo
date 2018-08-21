@@ -1,0 +1,65 @@
+backend: tensorflow
+app: tf_app_simple
+modeler: image_classification_modeler
+network: resnet50_slim
+inputter: image_classification_inputter_tfrecord
+augmenter: vgg
+
+model:
+  dir: output/resnet50_slim
+
+data:
+  height: 224
+  width: 224
+  depth: 3
+  num_classes: 1001
+  train_num_samples: 1281024
+  eval_num_samples: 50048
+  train_num_records: 1024
+  eval_num_records: 128
+  dir: /home/chuan/data/imagenet_mini
+
+run_config:  
+  winograd_nonfused: True
+  log_device_placement: False
+  save_summary_steps: 100
+  save_checkpoints_steps: 200
+  keep_checkpoint_max: 5
+  log_level: INFO
+  log_every_n_iter: 10
+  num_gpu: 1
+  prefetch: 2
+
+train:
+  epochs: 20
+  batch_size_per_gpu: 64
+  learning_rate: 0.01
+  optimizer: momentum
+  optimizer_momentum: 0.9
+  l2_weight_decay: 0.0002
+  skip_l2_var_list: ["BatchNorm","preact","postnorm"]
+  piecewise_learning_rate_decay: "1.0,0.1"
+  piecewise_boundaries: "10"
+  restore_ckpt: "/home/chuan/models/resnet_v2_50_2017_04_14"
+  skip_restore_var_list: ["resnet_v2_50/logits","step"]
+  trainable_var_list: ["resnet_v2_50/logits"]
+
+eval:
+  epochs: 1
+  batch_size_per_gpu: 64
+
+infer:
+  epochs: 1
+  batch_size_per_gpu: 1
+
+tune:
+  num_trials: 20
+  fixedparams:
+    train:
+      epochs: 4
+      piecewise_learning_rate_decay: "1.0,0.1"
+      piecewise_boundaries: "2"
+  hyperparams:
+    train:
+      learning_rate: "0.5,0.25,0.1,0.05,0.025,0.01,0.005,0.0025"
+      optimizer: "momentum,adam,rmsprop"

@@ -3,7 +3,7 @@ Copyright 2018 Lambda Labs. All Rights Reserved.
 Licensed under
 ==========================================================================
 
-Implement TF inputter interfaces for image classification (real data)
+Implement TF inputter interfaces for image classification (real data indexed by csv)
 """
 from __future__ import print_function
 import os
