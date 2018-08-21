@@ -377,7 +377,7 @@ class TF_App_Simple(tf_app.TF_App):
 
     batch = self.inputter.input_fn("train")
 
-    if False:
+    if True:
       with tf.Session() as sess:
         sess.run(tf.initialize_all_tables())
         sess.run(tf.global_variables_initializer())
@@ -411,7 +411,7 @@ class TF_App_Simple(tf_app.TF_App):
                 self.modeler.create_eval_metrics_fn(predictions, _y)
               tf.summary.scalar("training_accuracy", training_accuracy)
 
-    if True:
+    if False:
       # Build training graph
       with tf.device("/cpu:0"):
         batch = self.inputter.input_fn("train")

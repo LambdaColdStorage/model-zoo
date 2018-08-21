@@ -10,7 +10,7 @@ def net(inputs, num_classes, is_training=True):
 
   with tf.variable_scope(name_or_scope='FCN',
                          values=[inputs],
-                         reuse=tf.AUTO_REUSE) as scope:
+                         reuse=tf.AUTO_REUSE):
     kernel_init = tf.variance_scaling_initializer()
     # Encoder
     inputs = tf.layers.conv2d(inputs=inputs,
