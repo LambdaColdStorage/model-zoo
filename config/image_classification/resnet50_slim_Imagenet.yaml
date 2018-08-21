@@ -6,7 +6,7 @@ inputter: image_classification_inputter_tfrecord
 augmenter: vgg
 
 model:
-  dir: output/resnet50_slim
+  dir: model-zoo-data/model/resnet50_slim
 
 data:
   height: 224
@@ -17,7 +17,7 @@ data:
   eval_num_samples: 50048
   train_num_records: 1024
   eval_num_records: 128
-  dir: /home/chuan/data/imagenet_mini
+  dir: model-zoo-data/data/imagenet_mini
 
 run_config:  
   winograd_nonfused: True
@@ -40,7 +40,7 @@ train:
   skip_l2_var_list: ["BatchNorm","preact","postnorm"]
   piecewise_learning_rate_decay: "1.0,0.1"
   piecewise_boundaries: "10"
-  restore_ckpt: "/home/chuan/models/resnet_v2_50_2017_04_14"
+  restore_ckpt: "model-zoo-data/model/resnet_v2_50_2017_04_14"
   skip_restore_var_list: ["resnet_v2_50/logits","step"]
   trainable_var_list: ["resnet_v2_50/logits"]
 

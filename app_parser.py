@@ -14,6 +14,15 @@ def parse_config(config_path):
       config["run_config"]["num_gpu"]
   config["infer"]["batch_size"] = config["infer"]["batch_size_per_gpu"] * \
       config["run_config"]["num_gpu"]
+  if "dir" in config["model"]:
+    config["model"]["dir"] = os.path.join(os.environ['HOME'],
+                                          config["model"]["dir"])
+  if "dir" in config["data"]:
+    config["data"]["dir"] = os.path.join(os.environ['HOME'],
+                                         config["data"]["dir"])
+  if "restore_ckpt" in config["train"]:
+    config["train"]["restore_ckpt"] = \
+      os.path.join(os.environ['HOME'], config["train"]["restore_ckpt"])
   return config
 
 

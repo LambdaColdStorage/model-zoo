@@ -6,7 +6,7 @@ inputter: image_segmentation_inputter_csv
 augmenter: fcn
 
 model:
-  dir: output/fcn_Camvid
+  dir: model-zoo-data/model/fcn_Camvid
 
 data:
   height: 360
@@ -15,7 +15,7 @@ data:
   num_classes: 12
   train_num_samples: 367
   eval_num_samples: 233
-  dir: data/Camvid
+  dir: model-zoo-data/data/Camvid
   train_meta: train.csv
   eval_meta: test.csv  
   output_height: 368

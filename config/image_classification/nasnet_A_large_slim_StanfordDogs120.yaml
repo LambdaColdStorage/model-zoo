@@ -6,7 +6,7 @@ inputter: image_classification_inputter_csv
 augmenter: inception
 
 model:
-  dir: output/nasnet_A_large_slim
+  dir: model-zoo-data/model/nasnet_A_large_slim
 
 data:
   height: 331
@@ -15,7 +15,7 @@ data:
   num_classes: 120
   train_num_samples: 12000
   eval_num_samples: 8580
-  dir: data/StanfordDogs120
+  dir: model-zoo-data/data/StanfordDogs120
   train_meta: train.csv
   eval_meta: eval.csv  
 
@@ -24,7 +24,7 @@ run_config:
   log_device_placement: False
   save_summary_steps: 100
   save_checkpoints_steps: 200
-  keep_checkpoint_max: 5
+  keep_checkpoint_max: 1
   log_level: INFO
   log_every_n_iter: 10
   num_gpu: 4
@@ -33,14 +33,14 @@ run_config:
 train:
   epochs: 20
   batch_size_per_gpu: 16
-  learning_rate: 0.01
+  learning_rate: 0.0025
   optimizer: momentum
   optimizer_momentum: 0.9
   l2_weight_decay: 0.0002
   skip_l2_var_list: ["bn"]
-  piecewise_learning_rate_decay: "1.0,0.1"
-  piecewise_boundaries: "10"
-  restore_ckpt: "/mnt/data500G/model/nasnet-a_large_04_10_2017"
+  piecewise_learning_rate_decay: "1.0,0.1,0.01"
+  piecewise_boundaries: "10,15"
+  restore_ckpt: "model-zoo-data/model/nasnet-a_large_04_10_2017"
   skip_restore_var_list: ["final_layer","aux_logits","global_step"]
   # trainable_var_list: ["final_layer","aux_logits"]
 

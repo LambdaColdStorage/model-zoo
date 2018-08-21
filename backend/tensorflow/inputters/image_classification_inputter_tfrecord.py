@@ -80,12 +80,15 @@ class Inputter(inputter.Inputter):
         "Cannot find " + data_dir)
 
       # return the list of filenames
-      filename = []
       if mode == "train":
-        filenames = [os.path.join(data_dir, 'train-%05d-of-%05d' % (i, self.config["data"]["train_num_records"]))
+        filenames = [os.path.join(data_dir,
+                     ('train-%05d-of-%05d' %
+                      (i, self.config["data"]["train_num_records"])))
                      for i in range(self.config["data"]["train_num_records"])]
       elif mode == "eval":
-        filenames = [os.path.join(data_dir, 'validation-%05d-of-%05d' % (i, self.config["data"]["eval_num_records"]))
+        filenames = [os.path.join(data_dir,
+                     ('validation-%05d-of-%05d' %
+                      (i, self.config["data"]["eval_num_records"])))
                      for i in range(self.config["data"]["eval_num_records"])]
       else:
         assert False, "Unknow mode {} in get_samples_fn.".format(mode)
@@ -148,10 +151,11 @@ class Inputter(inputter.Inputter):
     image = self.augmenter(image,
                            self.config["data"]["height"],
                            self.config["data"]["width"],
-                           is_training)    
+                           is_training)
     label = tf.one_hot(0, depth=self.config["data"]["num_classes"])
 
     return image, label
+
 
 def build(config):
   """Returns the constructor of the inputter

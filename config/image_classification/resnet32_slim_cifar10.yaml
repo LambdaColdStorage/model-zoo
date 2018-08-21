@@ -6,7 +6,7 @@ inputter: image_classification_inputter_csv
 augmenter: cifar
 
 model:
-  dir: output/resnet32_slim
+  dir: model-zoo-data/model/resnet32_slim
 
 data:
   height: 32
@@ -15,7 +15,7 @@ data:
   num_classes: 10
   train_num_samples: 50000
   eval_num_samples: 10000
-  dir: data/cifar10
+  dir: model-zoo-data/data/cifar10
   train_meta: train.csv
   eval_meta: eval.csv  
 

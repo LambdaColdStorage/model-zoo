@@ -8,7 +8,6 @@ Implement TF application use low level API (tf.train)
 from __future__ import print_function
 import time
 import os
-import numpy as np
 
 import tensorflow as tf
 

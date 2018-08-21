@@ -6,7 +6,7 @@ inputter: image_classification_inputter_csv
 augmenter: vgg
 
 model:
-  dir: output/resnet50_slim
+  dir: model-zoo-data/model/resnet50_slim
 
 data:
   height: 224
@@ -15,7 +15,7 @@ data:
   num_classes: 120
   train_num_samples: 12000
   eval_num_samples: 8580
-  dir: data/StanfordDogs120
+  dir: model-zoo-data/data/StanfordDogs120
   train_meta: train.csv
   eval_meta: eval.csv  
 
@@ -40,7 +40,7 @@ train:
   skip_l2_var_list: ["BatchNorm","preact","postnorm"]
   piecewise_learning_rate_decay: "1.0,0.1"
   piecewise_boundaries: "10"
-  restore_ckpt: "/home/chuan/models/resnet_v2_50_2017_04_14"
+  restore_ckpt: "model-zoo-data/model/resnet_v2_50_2017_04_14"
   skip_restore_var_list: ["resnet_v2_50/logits","step"]
   trainable_var_list: ["resnet_v2_50/logits"]
 
