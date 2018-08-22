@@ -170,11 +170,11 @@ class TF_App_Simple(tf_app.TF_App):
     # Run training
     with tf.Session(config=self.session_config) as sess:
       if variables_to_restore and not tf.train.checkpoint_exists(
-        self.config["model"]["dir"] + "/model.*"):
+        self.config["model"]["dir"] + "/*ckpt*"):
 
         start = time.time()
         if tf.train.checkpoint_exists(self.config["train"]["restore_ckpt"] +
-                                      "/*.ckpt"):
+                                      "/*ckpt*"):
           saver_pre_trained.restore(sess,
                                     tf.train.latest_checkpoint(
                                       self.config["train"]["restore_ckpt"]))
@@ -192,7 +192,7 @@ class TF_App_Simple(tf_app.TF_App):
               self.config["train"]["restore_ckpt"] +
               " in " + str(end - start) + "sec.")
       elif tf.train.checkpoint_exists(
-        self.config["model"]["dir"] + "/model.*"):
+        self.config["model"]["dir"] + "/*ckpt*"):
         saver.restore(sess,
                       tf.train.latest_checkpoint(
                         self.config["model"]["dir"]))
@@ -289,7 +289,7 @@ class TF_App_Simple(tf_app.TF_App):
       sess.run(tf.global_variables_initializer())
 
       if tf.train.checkpoint_exists(
-        self.config["model"]["dir"] + "/model.*"):
+        self.config["model"]["dir"] + "/*ckpt*"):
         saver.restore(sess,
                       tf.train.latest_checkpoint(
                         self.config["model"]["dir"]))
@@ -330,6 +330,8 @@ class TF_App_Simple(tf_app.TF_App):
     max_steps = (len(test_samples) //
                  self.config["infer"]["batch_size"])
 
+    print(test_samples)
+    print(max_steps)
     # Build evaluation graph
     with tf.device("/cpu:0"):
       global_step = tf.train.get_or_create_global_step()
@@ -356,7 +358,7 @@ class TF_App_Simple(tf_app.TF_App):
       sess.run(tf.global_variables_initializer())
 
       if tf.train.checkpoint_exists(
-        self.config["model"]["dir"] + "/model.*"):
+        self.config["model"]["dir"] + "/*ckpt*"):
         saver.restore(sess,
                       tf.train.latest_checkpoint(
                         self.config["model"]["dir"]))
