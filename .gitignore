@@ -1,4 +1,4 @@
 *.pyc
 output/*
 data/*
-docs/*
+docs/build/*
